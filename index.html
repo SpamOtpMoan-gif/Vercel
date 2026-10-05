@@ -1,0 +1,2051 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a1a2e">
+<title>SMK Bandara App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:#f1f5f9;color:#0f172a;min-height:100vh;display:flex;justify-content:center;align-items:flex-start;-webkit-font-smoothing:antialiased;}
+.app-container{width:100%;max-width:600px;min-height:100vh;background:#fff;display:flex;flex-direction:column;box-shadow:0 0 40px rgba(15,23,42,0.1);position:relative;}
+
+/* Splash — video background */
+.splash{position:fixed;inset:0;background:#0f172a;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;transition:opacity .55s,visibility .55s;color:#fff;overflow:hidden;}
+.splash.hide{opacity:0;visibility:hidden;pointer-events:none;}
+.splash-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;}
+.splash-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,132,199,.55) 0%,rgba(15,23,42,.75) 55%,rgba(15,23,42,.92) 100%);z-index:1;}
+.splash-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;padding:24px;text-align:center;}
+.splash-emoji{font-size:3.2rem;margin-bottom:12px;animation:pop .6s cubic-bezier(.34,1.56,.64,1);filter:drop-shadow(0 4px 12px rgba(0,0,0,.35));}
+.splash-greeting{font-size:1.55rem;font-weight:800;text-align:center;opacity:0;animation:fadeUp .4s ease .2s forwards;text-shadow:0 2px 12px rgba(0,0,0,.4);}
+.splash-sub{font-size:.92rem;color:#e0f2fe;margin-top:8px;opacity:0;animation:fadeUp .4s ease .35s forwards;text-shadow:0 1px 8px rgba(0,0,0,.35);}
+.splash-bar{width:56px;height:4px;background:rgba(255,255,255,.25);border-radius:10px;margin-top:26px;overflow:hidden;opacity:0;animation:fadeUp .3s ease .5s forwards;}
+.splash-bar::after{content:'';display:block;height:100%;width:40%;background:#fff;border-radius:10px;animation:load 1s ease infinite;}
+.splash-sound-hint{margin-top:22px;padding:10px 18px;border:1.5px solid rgba(255,255,255,.35);background:rgba(2,132,199,.35);color:#fff;font-size:.8rem;font-weight:700;font-family:inherit;border-radius:50px;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;animation:fadeUp .35s ease .5s forwards;letter-spacing:.2px;-webkit-tap-highlight-color:transparent;transition:background .2s,transform .15s,opacity .3s;}
+.splash-sound-hint:active{background:rgba(2,132,199,.55);transform:scale(.96);}
+.splash-sound-hint.hide{opacity:0;pointer-events:none;height:0;margin:0;padding:0;border:none;overflow:hidden;}
+.splash-skip{margin-top:14px;padding:13px 32px;border:1.5px solid rgba(255,255,255,.5);background:rgba(255,255,255,.18);color:#fff;font-size:.92rem;font-weight:800;font-family:inherit;border-radius:50px;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);opacity:0;animation:fadeUp .35s ease .6s forwards;letter-spacing:.3px;-webkit-tap-highlight-color:transparent;transition:background .2s,transform .15s;box-shadow:0 4px 20px rgba(0,0,0,.2);}
+.splash-skip:active{background:rgba(255,255,255,.32);transform:scale(.96);}
+@keyframes pop{0%{transform:scale(.4);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes load{0%{transform:translateX(-100%)}100%{transform:translateX(320%)}}
+
+/* Header */
+.header{position:relative;height:210px;background:linear-gradient(135deg,#0284c7,#0f172a);overflow:hidden;}
+.header img{width:100%;height:100%;object-fit:cover;opacity:.4;display:block;}
+.header-overlay{position:absolute;inset:0;background:linear-gradient(to top,#0f172a 5%,rgba(15,23,42,.5) 40%,rgba(2,132,199,.15) 100%);display:flex;flex-direction:column;justify-content:flex-end;padding:24px 22px;color:#fff;}
+.school{font-size:.7rem;font-weight:700;color:#7dd3fc;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;opacity:.95;}
+.header h1{font-size:1.6rem;font-weight:800;line-height:1.2;text-shadow:0 2px 12px rgba(0,0,0,.35);letter-spacing:-.3px;}
+.header-line{height:3px;background:linear-gradient(90deg,#0284c7,#38bdf8,#22d3ee,#25d366);}
+
+/* Motto */
+.motto-banner{background:linear-gradient(90deg,#f0f9ff,#e0f2fe);border-bottom:1px solid #bae6fd;padding:13px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;transition:background .2s;}
+.motto-banner:active{background:#e0f2fe;}
+.motto-badge{background:linear-gradient(135deg,#0284c7,#0369a1);color:#fff;font-size:.68rem;font-weight:800;padding:5px 10px;border-radius:8px;text-transform:uppercase;white-space:nowrap;box-shadow:0 2px 8px rgba(2,132,199,.3);}
+.motto-text{font-size:.84rem;font-weight:700;color:#0369a1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;transition:opacity .25s;}
+
+/* Form body */
+.body{padding:18px 14px 32px;background:#f1f5f9;}
+.form-card{background:#fff;border-radius:20px;padding:18px 16px;margin-bottom:14px;box-shadow:0 2px 16px rgba(15,23,42,.06);border:1px solid rgba(226,232,240,.8);}
+.group{margin-bottom:15px;}
+.group:last-child{margin-bottom:0;}
+.group label{display:block;font-size:.78rem;font-weight:800;color:#334155;margin-bottom:7px;letter-spacing:.25px;}
+.group input,.group select,.group textarea{width:100%;padding:13px 15px;border:1.5px solid #e2e8f0;border-radius:14px;font-size:.91rem;font-family:inherit;background:#f8fafc;color:#0f172a;transition:border-color .2s,box-shadow .2s,background .2s;-webkit-appearance:none;appearance:none;}
+.group input:focus,.group select:focus,.group textarea:focus{outline:none;border-color:#0284c7;background:#fff;box-shadow:0 0 0 4px rgba(2,132,199,.12);}
+.group input::placeholder,.group textarea::placeholder{color:#94a3b8;}
+.group textarea{min-height:86px;resize:vertical;}
+.group select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:42px;}
+.quick-reasons{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;}
+.chip{border:1.5px solid #e2e8f0;background:#f8fafc;color:#475569;font-size:.74rem;font-weight:700;font-family:inherit;padding:7px 12px;border-radius:20px;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.chip:active,.chip.active{background:linear-gradient(135deg,#0284c7,#0369a1);color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(2,132,199,.3);}
+.wa-row{display:flex;gap:8px;align-items:stretch;}
+.wa-row input{flex:1;}
+.wa-save-btn{border:none;background:linear-gradient(135deg,#e0f2fe,#bae6fd);color:#0369a1;font-size:.78rem;font-weight:800;font-family:inherit;padding:0 16px;border-radius:14px;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent;transition:all .15s;}
+.wa-save-btn:active{background:linear-gradient(135deg,#0284c7,#0369a1);color:#fff;}
+.hint{font-size:.68rem;color:#94a3b8;margin-top:6px;line-height:1.4;}
+.btn-row{display:flex;gap:10px;margin-top:4px;}
+.btn{flex:1;padding:15px 16px;border:none;border-radius:16px;font-size:.9rem;font-weight:800;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;-webkit-tap-highlight-color:transparent;transition:transform .15s,box-shadow .2s;}
+.btn:active{transform:scale(.97);}
+.btn-wa{background:linear-gradient(135deg,#0284c7,#0369a1);color:#fff;box-shadow:0 8px 24px -4px rgba(2,132,199,.5);}
+.btn-group{background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;box-shadow:0 8px 24px -4px rgba(37,211,102,.45);width:100%;}
+.btn-copy{background:#f1f5f9;color:#475569;border:1.5px solid #e2e8f0;flex:0 0 auto;padding:15px 18px;}
+.btn svg{width:18px;height:18px;fill:currentColor;flex-shrink:0;}
+.note{margin-top:14px;margin-bottom:6px;text-align:center;font-size:.72rem;color:#94a3b8;font-weight:600;}
+
+/* Surat preview */
+.surat-preview{background:#fff;border:1.5px solid #bae6fd;border-radius:20px;padding:0;margin:4px 0 14px;overflow:hidden;box-shadow:0 4px 20px rgba(2,132,199,.1);}
+.surat-preview-header{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:linear-gradient(135deg,#0284c7,#0ea5e9);color:#fff;}
+.surat-preview-title{font-size:.82rem;font-weight:800;letter-spacing:.3px;display:flex;align-items:center;gap:8px;}
+.surat-preview-badge{font-size:.65rem;font-weight:800;background:rgba(255,255,255,.22);padding:4px 10px;border-radius:20px;}
+.surat-preview-body{padding:0;font-size:.8rem;line-height:1.55;color:#334155;max-height:340px;overflow-y:auto;font-family:inherit;background:linear-gradient(180deg,#fffbeb 0%,#fff 30%);}
+.surat-preview-empty{padding:22px 16px;text-align:center;color:#94a3b8;font-size:.82rem;line-height:1.5;}
+.surat-preview-empty strong{color:#0284c7;display:block;margin-bottom:4px;font-size:.9rem;}
+.surat-deco{padding:16px 16px 18px;position:relative;}
+.surat-deco-top{text-align:center;font-size:.78rem;font-weight:800;color:#0369a1;letter-spacing:.3px;margin-bottom:4px;}
+.surat-deco-school{text-align:center;font-size:.72rem;font-weight:700;color:#0284c7;margin-bottom:10px;letter-spacing:1.5px;}
+.surat-deco-line{height:1px;background:linear-gradient(90deg,transparent,#bae6fd,#0284c7,#bae6fd,transparent);margin:10px 0;}
+.surat-deco-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:.82rem;gap:10px;}
+.surat-deco-row span{color:#64748b;font-weight:600;flex-shrink:0;}
+.surat-deco-row b{color:#0f172a;font-weight:800;text-align:right;}
+.surat-jenis-tag{background:#e0f2fe;color:#0369a1;padding:2px 10px;border-radius:8px;font-size:.75rem;}
+.surat-deco-alasan-label{font-size:.75rem;font-weight:800;color:#64748b;margin-bottom:6px;}
+.surat-deco-alasan{background:#f0f9ff;border-left:3px solid #0284c7;padding:10px 12px;border-radius:0 10px 10px 0;font-size:.84rem;color:#1e293b;font-style:italic;line-height:1.5;}
+.surat-deco-sign{text-align:right;margin-top:4px;font-size:.82rem;color:#334155;line-height:1.5;}
+.surat-deco-sign b{color:#0f172a;font-size:.9rem;}
+.surat-deco-sign i{color:#64748b;font-style:normal;font-size:.75rem;}
+.surat-deco-bottom{text-align:center;font-size:.72rem;font-weight:700;color:#94a3b8;margin-top:12px;letter-spacing:.3px;}
+
+/* History */
+.history-card{background:#fff;border:1.5px solid #e2e8f0;border-radius:18px;padding:16px;margin-bottom:20px;box-shadow:0 2px 12px rgba(15,23,42,.05);}
+.history-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.history-title{font-size:.9rem;font-weight:800;color:#0f172a;display:flex;align-items:center;gap:8px;}
+.history-clear{font-size:.75rem;font-weight:700;color:#ef4444;background:rgba(239,68,68,.08);border:none;cursor:pointer;font-family:inherit;padding:5px 10px;border-radius:8px;}
+.history-empty{font-size:.82rem;color:#94a3b8;text-align:center;padding:14px 0;}
+.history-item{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:12px 14px;margin-bottom:8px;font-size:.8rem;transition:border-color .15s;}
+.history-item:last-child{margin-bottom:0;}
+.hi-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.hi-jenis{font-weight:800;color:#0284c7;font-size:.72rem;background:#e0f2fe;padding:3px 9px;border-radius:8px;}
+.hi-date{color:#94a3b8;font-size:.7rem;}
+.hi-alasan{color:#475569;line-height:1.45;}
+.hi-reuse{margin-top:8px;font-size:.72rem;font-weight:800;color:#0284c7;background:none;border:none;cursor:pointer;font-family:inherit;padding:0;}
+
+/* Video */
+.video-card{position:relative;border-radius:16px;overflow:hidden;margin-bottom:24px;box-shadow:0 8px 20px rgba(0,0,0,.12);background:#0f172a;}
+.video-card video{width:100%;height:220px;object-fit:cover;display:block;}
+.video-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(15,23,42,.85),transparent 60%);display:flex;align-items:flex-end;justify-content:space-between;padding:14px 18px;color:#fff;pointer-events:none;}
+.video-title{font-size:.9rem;font-weight:800;color:#38bdf8;}
+.sound-btn{background:#0284c7;color:#fff;border:none;padding:8px 14px;border-radius:20px;font-size:.8rem;font-weight:800;cursor:pointer;pointer-events:auto;transition:background .2s;-webkit-tap-highlight-color:transparent;}
+
+/* National */
+.national-section{background:#fff;border:1.5px solid #e0f2fe;border-radius:16px;padding:20px;margin-bottom:24px;}
+.section-tab-header{display:flex;gap:10px;margin-bottom:16px;border-bottom:2px solid #f1f5f9;padding-bottom:10px;}
+.tab-btn{flex:1;padding:10px;border:none;background:#f1f5f9;color:#64748b;font-size:.85rem;font-weight:700;border-radius:10px;cursor:pointer;font-family:inherit;transition:background .2s,color .2s;-webkit-tap-highlight-color:transparent;}
+.tab-btn.active{background:#0284c7;color:#fff;}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+.pancasila-item{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;font-size:.85rem;color:#1e293b;line-height:1.45;}
+.pancasila-num{background:#0284c7;color:#fff;font-size:.75rem;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+.janji-item{margin-bottom:10px;font-size:.85rem;color:#334155;line-height:1.5;padding-left:14px;border-left:3px solid #0284c7;}
+
+/* Smart card */
+.smart-card{background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:16px;padding:20px;color:#fff;margin-bottom:24px;}
+.smart-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.smart-tag{background:#ef4444;color:#fff;font-size:.68rem;font-weight:800;padding:3px 8px;border-radius:6px;text-transform:uppercase;}
+.smart-title{font-size:1rem;font-weight:800;color:#38bdf8;}
+.smart-desc{font-size:.85rem;color:#cbd5e1;line-height:1.5;margin-bottom:14px;}
+.comparison-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.comp-box{border-radius:10px;padding:10px;font-size:.78rem;line-height:1.4;}
+.comp-bad{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#fca5a5;}
+.comp-good{background:rgba(56,189,248,.15);border:1px solid rgba(56,189,248,.3);color:#7dd3fc;}
+.comp-title{font-weight:800;margin-bottom:4px;display:block;}
+.footer-copyright{text-align:center;font-size:.75rem;color:#94a3b8;padding:10px 0 80px;}
+
+/* Toast */
+.toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(80px);background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;font-size:.84rem;font-weight:700;padding:13px 22px;border-radius:14px;z-index:200;box-shadow:0 10px 30px rgba(0,0,0,.3);opacity:0;transition:transform .3s,opacity .3s;max-width:90%;text-align:center;pointer-events:none;border:1px solid rgba(148,163,184,.15);}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+
+/* Bottom Nav */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:600px;background:rgba(255,255,255,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(226,232,240,.8);display:flex;z-index:150;box-shadow:0 -8px 32px rgba(15,23,42,.08);padding-bottom:env(safe-area-inset-bottom,0);}
+.nav-item{flex:1;padding:10px 6px 12px;border:none;background:none;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:#94a3b8;font-size:.6rem;font-weight:700;-webkit-tap-highlight-color:transparent;transition:color .2s;}
+.nav-item.active{color:#0284c7;}
+.nav-item.active .nav-icon{transform:scale(1.12);filter:drop-shadow(0 2px 4px rgba(2,132,199,.3));}
+.nav-item .nav-icon{font-size:1.3rem;line-height:1;transition:transform .2s,filter .2s;}
+
+/* Pages */
+.page{display:none;}
+.page.active{display:block;}
+
+/* Chat — premium dark */
+.chat-page{display:flex;flex-direction:column;height:calc(100vh - 56px);background:#0c1222;background-image:radial-gradient(ellipse at 20% 0%,rgba(2,132,199,.12) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(37,211,102,.06) 0%,transparent 40%);}
+.chat-header{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(148,163,184,.12);flex-shrink:0;box-shadow:0 4px 20px rgba(0,0,0,.25);}
+.chat-header-avatar{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#0284c7,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:1.05rem;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 4px 14px rgba(2,132,199,.4);letter-spacing:-.5px;}
+.chat-header-info{flex:1;min-width:0;}
+.chat-header-title{font-size:1rem;font-weight:800;color:#f1f5f9;letter-spacing:.2px;}
+.chat-header-sub{font-size:.7rem;color:#64748b;margin-top:2px;font-weight:600;}
+.chat-header-status{display:inline-flex;align-items:center;gap:5px;font-size:.68rem;color:#22c55e;font-weight:700;margin-top:3px;}
+.chat-header-status::before{content:'';width:6px;height:6px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px #22c55e;animation:pulse-dot 1.5s ease infinite;}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
+.chat-messages{flex:1;overflow-y:auto;padding:16px 14px 16px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch;}
+.chat-msg{max-width:82%;padding:10px 14px 8px;border-radius:16px;font-size:.9rem;line-height:1.45;word-break:break-word;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+.chat-msg.them{align-self:flex-start;background:linear-gradient(145deg,#1e293b,#1a2332);color:#e2e8f0;border-radius:4px 16px 16px 16px;border:1px solid rgba(148,163,184,.1);}
+.chat-msg.me{align-self:flex-end;background:linear-gradient(135deg,#0284c7,#0369a1);color:#fff;border-radius:16px 4px 16px 16px;box-shadow:0 4px 14px rgba(2,132,199,.3);}
+.chat-msg-name{font-size:.7rem;font-weight:800;color:#38bdf8;margin-bottom:3px;letter-spacing:.2px;}
+.chat-msg-time{display:block;text-align:right;font-size:.6rem;color:#64748b;margin-top:4px;font-weight:600;}
+.chat-msg.me .chat-msg-time{color:rgba(255,255,255,.55);}
+.chat-input-bar{display:flex;gap:10px;padding:12px 14px;background:rgba(15,23,42,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid rgba(148,163,184,.1);flex-shrink:0;padding-bottom:calc(12px + env(safe-area-inset-bottom,0));margin-bottom:56px;position:relative;z-index:160;align-items:center;}
+.chat-input-bar input{flex:1;padding:13px 18px;border:1.5px solid rgba(148,163,184,.15);border-radius:28px;background:#1e293b;color:#f1f5f9;font-size:.92rem;font-family:inherit;outline:none;transition:border-color .2s,box-shadow .2s;}
+.chat-input-bar input:focus{border-color:#0284c7;box-shadow:0 0 0 3px rgba(2,132,199,.15);}
+.chat-input-bar input::placeholder{color:#64748b;}
+.chat-send-btn{width:48px;height:48px;border-radius:50%;border:none;background:linear-gradient(135deg,#0284c7,#06b6d4);color:#fff;font-size:1.15rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;-webkit-tap-highlight-color:transparent;position:relative;z-index:161;touch-action:manipulation;box-shadow:0 4px 16px rgba(2,132,199,.4);transition:transform .15s,box-shadow .2s;}
+.chat-send-btn:active{transform:scale(.9);box-shadow:0 2px 8px rgba(2,132,199,.3);}
+.chat-system{align-self:center;background:rgba(30,41,59,.8);color:#94a3b8;font-size:.72rem;padding:8px 16px;border-radius:12px;max-width:90%;text-align:center;border:1px solid rgba(148,163,184,.1);line-height:1.5;font-weight:600;}
+
+/* ===== TOOLS PAGE (Dark Gray Black) ===== */
+.tools-page{padding:20px 16px 100px;background:#0d0d1a;min-height:100vh;}
+.tools-page-header{background:linear-gradient(135deg,#1a1a2e,#2d2d44);border:1px solid rgba(150,150,200,.15);border-radius:16px;padding:20px;margin-bottom:20px;display:flex;align-items:center;gap:14px;box-shadow:0 8px 32px rgba(0,0,0,.5);color:#fff;}
+.tools-page-icon{font-size:2.2rem;}
+.tools-page-title{font-size:1.1rem;font-weight:800;color:#e2e8f0;letter-spacing:.4px;}
+.tools-page-sub{font-size:.75rem;color:#8892a4;margin-top:3px;}
+.tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.tool-card{background:#1a1a2e;border:1.5px solid rgba(100,116,139,.2);border-radius:16px;padding:16px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;cursor:pointer;transition:border-color .2s,transform .15s,box-shadow .2s;-webkit-tap-highlight-color:transparent;box-shadow:0 2px 12px rgba(0,0,0,.4);}
+.tool-card:active{transform:scale(.97);}
+.tool-card.active-tool{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.25),0 8px 20px rgba(99,102,241,.15);}
+.tool-card-icon{font-size:1.6rem;}
+.tool-card-name{font-size:.85rem;font-weight:800;color:#e2e8f0;}
+.tool-card-desc{font-size:.7rem;color:#64748b;line-height:1.4;}
+.tool-badge{font-size:.6rem;font-weight:800;padding:2px 7px;border-radius:6px;}
+.badge-hot{background:rgba(239,68,68,.18);color:#f87171;border:1px solid rgba(239,68,68,.3);}
+.badge-new{background:rgba(99,102,241,.18);color:#818cf8;border:1px solid rgba(99,102,241,.3);}
+
+/* ===== TikTok DL Panel (Dark) ===== */
+.tt-panel{background:#1a1a2e;border-radius:16px;padding:0;margin-bottom:12px;display:none;border:1.5px solid rgba(100,116,139,.2);box-shadow:0 4px 24px rgba(0,0,0,.5);overflow:hidden;}
+.tt-panel.active{display:block;}
+.tt-panel-header{padding:16px 18px 12px;border-bottom:1px solid rgba(100,116,139,.15);display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#1e1e35,#252540);}
+.tt-logo-stack{position:relative;width:24px;height:24px;flex-shrink:0;}
+.tt-logo-stack span{position:absolute;font-size:1.1rem;}
+.tt-logo-stack .cyan{left:0;top:0;}
+.tt-logo-stack .white{left:0;top:0;}
+.tt-panel-title{font-size:.95rem;font-weight:800;letter-spacing:.5px;color:#a5b4fc;}
+.tt-search-box{padding:16px;border-bottom:1px solid rgba(100,116,139,.15);background:#16162a;}
+.tt-url-input{width:100%;padding:13px 16px;border:1.5px solid rgba(100,116,139,.25);border-radius:50px;background:#0d0d1a;color:#e2e8f0;font-size:.88rem;font-family:inherit;outline:none;margin-bottom:12px;}
+.tt-url-input:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.2);}
+.tt-url-input::placeholder{color:#4b5563;}
+.tt-dl-btn{width:100%;padding:14px;border:none;border-radius:50px;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;font-size:.9rem;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:.5px;transition:opacity .2s;box-shadow:0 6px 20px rgba(99,102,241,.4);-webkit-tap-highlight-color:transparent;}
+.tt-dl-btn:disabled{opacity:.45;cursor:not-allowed;}
+.tt-error{margin:12px 16px 0;padding:12px 14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:12px;color:#f87171;font-size:.82rem;display:none;line-height:1.45;}
+.tt-empty{text-align:center;padding:32px 16px;color:#4b5563;}
+.tt-empty-icon{font-size:3rem;margin-bottom:12px;display:block;}
+.tt-empty-title{font-size:1rem;font-weight:800;color:#9ca3af;margin-bottom:8px;}
+.tt-empty-sub{font-size:.8rem;color:#6b7280;line-height:1.5;}
+.tt-result{display:none;}
+.tt-video-header{padding:12px 16px 8px;display:flex;align-items:center;justify-content:space-between;background:#16162a;}
+.tt-video-label{font-size:.72rem;font-weight:800;color:#818cf8;letter-spacing:.6px;}
+.tt-dur-badge{background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);border-radius:20px;padding:3px 10px;font-size:.7rem;font-weight:800;color:#818cf8;}
+.tt-video-wrap{background:#0a0a14;position:relative;}
+.tt-video-wrap video{width:100%;max-height:320px;object-fit:contain;display:block;}
+.tt-actions{padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;border-bottom:1px solid rgba(100,116,139,.15);background:#1a1a2e;}
+.tt-btn-save{padding:13px;border:1.5px solid rgba(99,102,241,.4);border-radius:50px;background:rgba(99,102,241,.12);color:#a5b4fc;font-size:.82rem;font-weight:800;font-family:inherit;cursor:pointer;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;-webkit-tap-highlight-color:transparent;}
+.tt-btn-share{padding:13px;border:none;border-radius:50px;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;font-size:.82rem;font-weight:800;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;-webkit-tap-highlight-color:transparent;}
+.tt-info-card{margin:12px 16px;padding:14px;background:#16162a;border:1px solid rgba(100,116,139,.15);border-radius:16px;}
+.tt-info-label{font-size:.65rem;font-weight:800;color:#6b7280;letter-spacing:.8px;margin-bottom:10px;}
+.tt-author-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.tt-avatar{width:42px;height:42px;border-radius:50%;background:#252540;border:1px solid rgba(100,116,139,.25);object-fit:cover;flex-shrink:0;}
+.tt-avatar-placeholder{width:42px;height:42px;border-radius:50%;background:#252540;border:1px solid rgba(100,116,139,.25);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.tt-author-name{font-size:.88rem;font-weight:800;color:#e2e8f0;}
+.tt-author-nick{font-size:.75rem;color:#6b7280;margin-top:2px;}
+.tt-region-badge{margin-left:auto;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);border-radius:8px;padding:4px 8px;font-size:.68rem;color:#818cf8;font-weight:800;}
+.tt-divider{height:1px;background:rgba(100,116,139,.15);margin:10px 0;}
+.tt-caption{font-size:.82rem;color:#9ca3af;line-height:1.5;margin-bottom:10px;}
+.tt-stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+.tt-stat{text-align:center;}
+.tt-stat-icon{font-size:.85rem;display:block;margin-bottom:3px;}
+.tt-stat-val{font-size:.7rem;font-weight:800;color:#d1d5db;}
+.tt-music-card{margin:0 16px 16px;padding:14px;background:#16162a;border:1px solid rgba(100,116,139,.15);border-radius:16px;}
+.tt-music-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.tt-music-label{font-size:.65rem;font-weight:800;color:#6b7280;letter-spacing:.8px;flex:1;}
+.tt-music-row{display:flex;align-items:center;gap:12px;}
+.tt-music-icon{width:42px;height:42px;background:#252540;border:1px solid rgba(99,102,241,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+.tt-music-title{font-size:.85rem;font-weight:800;color:#e2e8f0;}
+.tt-music-author{font-size:.72rem;color:#6b7280;margin-top:2px;}
+
+/* ===== Other Tool Panels (Dark) ===== */
+.gen-panel{background:#1a1a2e;border:1.5px solid rgba(100,116,139,.2);border-radius:16px;padding:20px;margin-bottom:12px;display:none;box-shadow:0 4px 24px rgba(0,0,0,.4);}
+.gen-panel.active{display:block;}
+.gen-panel-title{font-size:.95rem;font-weight:800;color:#e2e8f0;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.gen-input{width:100%;padding:13px 16px;border:1.5px solid rgba(100,116,139,.25);border-radius:12px;font-size:.9rem;font-family:inherit;background:#0d0d1a;color:#e2e8f0;outline:none;margin-bottom:10px;}
+.gen-input:focus{border-color:#6366f1;background:#0d0d1a;box-shadow:0 0 0 3px rgba(99,102,241,.2);}
+.gen-input::placeholder{color:#4b5563;}
+.gen-btn{width:100%;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;border:none;border-radius:50px;padding:13px;font-size:.88rem;font-weight:800;font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;margin-bottom:12px;box-shadow:0 6px 20px rgba(99,102,241,.35);}
+.gen-result{background:#0d0d1a;border:1px solid rgba(100,116,139,.2);border-radius:12px;padding:14px;display:none;}
+.gen-result-label{font-size:.68rem;font-weight:800;color:#6b7280;letter-spacing:.8px;margin-bottom:6px;}
+.gen-result-val{font-size:.9rem;font-weight:700;color:#818cf8;word-break:break-all;margin-bottom:10px;}
+.gen-copy-btn{background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:.82rem;font-weight:800;font-family:inherit;cursor:pointer;}
+.gen-result img{width:180px;height:180px;border-radius:10px;display:block;margin-bottom:10px;border:2px solid rgba(99,102,241,.3);}
+.b64-tabs{display:flex;gap:8px;margin-bottom:12px;}
+.b64-tab{flex:1;padding:9px;border:1.5px solid rgba(100,116,139,.25);background:#0d0d1a;color:#6b7280;border-radius:10px;font-size:.82rem;font-weight:700;font-family:inherit;cursor:pointer;transition:all .15s;}
+.b64-tab.active{background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;border-color:#6366f1;}
+.gen-textarea{width:100%;min-height:90px;padding:12px 14px;border:1.5px solid rgba(100,116,139,.25);border-radius:12px;font-size:.82rem;font-family:'Courier New',monospace;background:#0d0d1a;color:#e2e8f0;resize:vertical;outline:none;margin-bottom:10px;}
+.gen-textarea:focus{border-color:#6366f1;}
+.gen-output{background:#0a0a14;border:1px solid rgba(99,102,241,.25);border-radius:12px;padding:14px;margin-top:10px;font-size:.8rem;font-family:'Courier New',monospace;color:#818cf8;word-break:break-all;line-height:1.5;display:none;}
+.qr-upload-zone{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:28px 16px;border:2px dashed rgba(100,116,139,.3);border-radius:16px;background:#0d0d1a;cursor:pointer;margin-bottom:12px;transition:border-color .2s,background .2s;-webkit-tap-highlight-color:transparent;}
+.qr-upload-zone:active,.qr-upload-zone.dragover{border-color:#6366f1;background:#12122a;}
+.qr-upload-icon{font-size:2rem;}
+
+/* ===== Photo Viewer Modal ===== */
+.photo-viewer-modal{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:9999;display:none;flex-direction:column;align-items:center;justify-content:center;}
+.photo-viewer-modal.active{display:flex;}
+.photo-viewer-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:1.4rem;width:42px;height:42px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;z-index:1;-webkit-tap-highlight-color:transparent;}
+.photo-viewer-img{max-width:96vw;max-height:85vh;object-fit:contain;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.8);}
+.photo-viewer-video{max-width:96vw;max-height:85vh;border-radius:12px;object-fit:contain;display:block;}
+.photo-viewer-label{color:#9ca3af;font-size:.75rem;margin-top:12px;font-weight:600;letter-spacing:.3px;}
+.photo-viewer-actions{display:flex;gap:10px;margin-top:16px;}
+.photo-viewer-dl{padding:10px 22px;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;border:none;border-radius:50px;font-size:.84rem;font-weight:800;font-family:inherit;cursor:pointer;text-decoration:none;display:flex;align-items:center;gap:6px;}
+
+.qr-upload-title{font-size:.9rem;font-weight:800;color:#e2e8f0;}
+.qr-upload-sub{font-size:.72rem;color:#6b7280;text-align:center;}
+.qr-file-info{background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:12px;padding:12px 14px;margin-bottom:12px;}
+.qr-file-name{font-size:.85rem;font-weight:800;color:#e2e8f0;word-break:break-all;}
+.qr-file-meta{font-size:.72rem;color:#6b7280;margin-top:4px;}
+
+/* ===== BELAJAR PAGE (DARK MODE) ===== */
+.belajar-page{padding:0 0 100px;background:#0d0d1a;min-height:100vh;color:#e2e8f0;}
+.belajar-header{background:linear-gradient(135deg,#1a1a2e,#0f0f1a);padding:24px 20px 20px;color:#fff;border-bottom:1px solid rgba(150,150,200,.1);}
+.belajar-header-top{display:flex;align-items:center;gap:12px;margin-bottom:4px;}
+.belajar-icon{font-size:2rem;}
+.belajar-title{font-size:1.25rem;font-weight:800;color:#e2e8f0;}
+.belajar-sub{font-size:.8rem;color:#8892a4;margin-top:2px;}
+.belajar-search{margin:0 16px;margin-top:-18px;background:#1a1a2e;border-radius:14px;padding:12px 16px;box-shadow:0 4px 20px rgba(0,0,0,.4);display:flex;align-items:center;gap:10px;margin-bottom:16px;border:1px solid rgba(100,116,139,.2);}
+.belajar-search input{flex:1;border:none;outline:none;font-family:inherit;font-size:.9rem;color:#e2e8f0;background:transparent;}
+.belajar-search input::placeholder{color:#4b5563;}
+.belajar-search-icon{font-size:1.1rem;color:#6366f1;}
+.mapel-section{padding:0 16px;}
+.mapel-section-title{font-size:.78rem;font-weight:800;color:#8892a4;letter-spacing:.6px;text-transform:uppercase;margin-bottom:10px;margin-top:16px;}
+.mapel-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px;}
+.mapel-card{background:#1a1a2e;border-radius:16px;padding:16px;cursor:pointer;transition:transform .15s,box-shadow .2s;box-shadow:0 2px 8px rgba(0,0,0,.4);-webkit-tap-highlight-color:transparent;border:1.5px solid rgba(100,116,139,.2);}
+.mapel-card:active{transform:scale(.97);}
+.mapel-card.active{border-color:var(--mc);box-shadow:0 0 0 2px rgba(var(--mc-rgb),.25),0 4px 16px rgba(var(--mc-rgb),.15);}
+.mapel-icon{font-size:1.8rem;margin-bottom:8px;display:block;}
+.mapel-name{font-size:.82rem;font-weight:800;color:#e2e8f0;margin-bottom:2px;}
+.mapel-kelas{font-size:.68rem;color:#64748b;}
+.mapel-dot{width:8px;height:8px;border-radius:50%;background:var(--mc);display:inline-block;margin-right:6px;}
+
+/* Materi Panel */
+.materi-panel{display:none;padding:0 16px 20px;}
+.materi-panel.active{display:block;}
+.materi-back{display:flex;align-items:center;gap:8px;padding:14px 0 10px;cursor:pointer;color:#818cf8;font-size:.85rem;font-weight:700;-webkit-tap-highlight-color:transparent;}
+.materi-panel-header{background:linear-gradient(135deg,var(--mc),var(--mc2));border-radius:16px;padding:20px;color:#fff;margin-bottom:16px;box-shadow:0 8px 24px rgba(0,0,0,.4);}
+.materi-panel-icon{font-size:2.5rem;margin-bottom:8px;}
+.materi-panel-name{font-size:1.1rem;font-weight:800;margin-bottom:4px;}
+.materi-panel-desc{font-size:.8rem;color:rgba(255,255,255,.8);}
+.materi-list{display:flex;flex-direction:column;gap:10px;}
+.materi-item{background:#1a1a2e;border-radius:14px;padding:16px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4);transition:transform .15s;-webkit-tap-highlight-color:transparent;border:1px solid rgba(100,116,139,.15);}
+.materi-item:active{transform:scale(.98);}
+.materi-item-top{display:flex;align-items:center;gap:12px;}
+.materi-num{width:32px;height:32px;border-radius:10px;background:rgba(var(--mc-rgb),.15);color:var(--mc);font-size:.8rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.materi-item-title{font-size:.88rem;font-weight:800;color:#e2e8f0;flex:1;}
+.materi-item-arrow{color:#64748b;font-size:.9rem;}
+.materi-item-preview{font-size:.78rem;color:#94a3b8;margin-top:8px;line-height:1.5;display:none;}
+.materi-item.open .materi-item-preview{display:block;}
+.materi-item.open .materi-item-arrow{transform:rotate(90deg);}
+.materi-tag{display:inline-block;font-size:.65rem;font-weight:800;padding:2px 8px;border-radius:6px;background:rgba(var(--mc-rgb),.15);color:var(--mc);margin-top:8px;}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
+
+/* ===== QUIZ STYLES (DARK MODE) ===== */
+.belajar-mode-toggle{display:flex;gap:8px;margin:0 16px 16px;background:#1a1a2e;border-radius:14px;padding:6px;box-shadow:0 2px 8px rgba(0,0,0,.4);border:1px solid rgba(100,116,139,.15);}
+.bmode-btn{flex:1;padding:10px 8px;border:none;border-radius:10px;font-family:inherit;font-size:.8rem;font-weight:700;cursor:pointer;background:transparent;color:#94a3b8;transition:all .2s;-webkit-tap-highlight-color:transparent;}
+.bmode-btn.active{background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;box-shadow:0 4px 12px rgba(99,102,241,.3);}
+.quiz-panel{padding:0 16px 20px;display:none;}
+.quiz-panel.active{display:block;}
+.quiz-mapel-select{background:#1a1a2e;border-radius:14px;padding:14px 16px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.4);border:1px solid rgba(100,116,139,.15);}
+.quiz-mapel-select label{font-size:.75rem;font-weight:800;color:#8892a4;letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:8px;}
+.quiz-select{width:100%;padding:12px 14px;border:1.5px solid rgba(100,116,139,.25);border-radius:10px;font-family:inherit;font-size:.9rem;color:#e2e8f0;background:#0d0d1a;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;}
+.quiz-select:focus{outline:none;border-color:#6366f1;}
+.quiz-start-btn{width:100%;padding:14px;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;border:none;border-radius:12px;font-family:inherit;font-size:.95rem;font-weight:800;cursor:pointer;-webkit-tap-highlight-color:transparent;margin-top:10px;transition:opacity .2s;box-shadow:0 6px 20px rgba(99,102,241,.35);}
+.quiz-start-btn:active{opacity:.85;}
+.quiz-box{background:#1a1a2e;border-radius:16px;padding:0;box-shadow:0 4px 20px rgba(0,0,0,.5);overflow:hidden;display:none;border:1px solid rgba(100,116,139,.2);}
+.quiz-box.active{display:block;}
+.quiz-prog-bar{height:5px;background:#0d0d1a;}
+.quiz-prog-fill{height:100%;background:linear-gradient(90deg,#4f46e5,#6366f1);transition:width .4s;}
+.quiz-header-info{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid rgba(100,116,139,.15);}
+.quiz-num-badge{font-size:.75rem;font-weight:800;color:#818cf8;background:rgba(99,102,241,.15);padding:4px 10px;border-radius:20px;}
+.quiz-score-live{font-size:.75rem;font-weight:800;color:#e2e8f0;}
+.quiz-question-wrap{padding:20px 16px 16px;}
+.quiz-question-mapel{font-size:.68rem;font-weight:800;color:#64748b;letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px;}
+.quiz-question-text{font-size:.95rem;font-weight:700;color:#e2e8f0;line-height:1.5;margin-bottom:18px;}
+.quiz-options{display:flex;flex-direction:column;gap:10px;}
+.quiz-opt{padding:13px 16px;border:1.5px solid rgba(100,116,139,.25);border-radius:12px;background:#0d0d1a;color:#e2e8f0;font-family:inherit;font-size:.88rem;font-weight:600;cursor:pointer;text-align:left;transition:all .15s;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;gap:10px;}
+.quiz-opt:active{transform:scale(.98);}
+.quiz-opt.correct{background:rgba(34,197,94,.15);border-color:#22c55e;color:#4ade80;}
+.quiz-opt.wrong{background:rgba(239,68,68,.15);border-color:#ef4444;color:#f87171;}
+.quiz-opt.disabled{cursor:not-allowed;}
+.quiz-opt-letter{width:26px;height:26px;border-radius:8px;background:rgba(99,102,241,.15);color:#818cf8;font-size:.75rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.quiz-opt.correct .quiz-opt-letter{background:#22c55e;color:#fff;}
+.quiz-opt.wrong .quiz-opt-letter{background:#ef4444;color:#fff;}
+.quiz-feedback{margin:12px 16px 0;padding:12px 14px;border-radius:10px;font-size:.82rem;font-weight:600;display:none;line-height:1.4;}
+.quiz-feedback.correct{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.3);}
+.quiz-feedback.wrong{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.3);}
+.quiz-next-btn{display:block;width:calc(100% - 32px);margin:14px 16px 16px;padding:13px;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;border:none;border-radius:12px;font-family:inherit;font-size:.9rem;font-weight:800;cursor:pointer;-webkit-tap-highlight-color:transparent;display:none;box-shadow:0 6px 20px rgba(99,102,241,.35);}
+.quiz-result-box{padding:28px 20px;text-align:center;display:none;}
+.quiz-result-box.active{display:block;}
+.quiz-result-emoji{font-size:3.5rem;margin-bottom:12px;}
+.quiz-result-title{font-size:1.2rem;font-weight:800;color:#e2e8f0;margin-bottom:6px;}
+.quiz-result-score{font-size:2.2rem;font-weight:800;color:#818cf8;margin-bottom:4px;}
+.quiz-result-sub{font-size:.85rem;color:#94a3b8;margin-bottom:20px;}
+.quiz-result-detail{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px;}
+.quiz-rd-item{background:#0d0d1a;border-radius:12px;padding:12px;text-align:center;border:1px solid rgba(100,116,139,.15);}
+.quiz-rd-val{font-size:1.3rem;font-weight:800;color:#e2e8f0;}
+.quiz-rd-lbl{font-size:.68rem;color:#64748b;margin-top:4px;}
+.quiz-retry-btn{width:100%;padding:14px;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;border:none;border-radius:12px;font-family:inherit;font-size:.9rem;font-weight:800;cursor:pointer;box-shadow:0 6px 20px rgba(99,102,241,.35);}
+
+.quiz-retry-btn{width:100%;padding:14px;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;border:none;border-radius:12px;font-family:inherit;font-size:.9rem;font-weight:800;cursor:pointer;box-shadow:0 6px 20px rgba(99,102,241,.35);}
+
+/* ===== FORM IZIN (DARK MODE) ===== */
+body{background:#0d0d1a;color:#e2e8f0;}
+.app-container{background:#0d0d1a;box-shadow:0 0 40px rgba(0,0,0,.6);}
+.header{background:linear-gradient(135deg,#1a1a2e,#0f0f1a);}
+.header-overlay{background:linear-gradient(to top,#0d0d1a 5%,rgba(13,13,26,.7) 40%,rgba(30,30,50,.25) 100%);}
+.school{color:#818cf8;}
+.header-line{background:linear-gradient(90deg,#4f46e5,#6366f1,#818cf8,#a5b4fc);}
+.motto-banner{background:linear-gradient(90deg,#1a1a2e,#252540);border-bottom:1px solid rgba(100,116,139,.2);}
+.motto-banner:active{background:#252540;}
+.motto-badge{background:linear-gradient(135deg,#4f46e5,#6366f1);box-shadow:0 2px 8px rgba(99,102,241,.35);}
+.motto-text{color:#a5b4fc;}
+.body{background:#0d0d1a;}
+.form-card{background:#1a1a2e;box-shadow:0 2px 16px rgba(0,0,0,.5);border:1px solid rgba(100,116,139,.2);}
+.group label{color:#cbd5e1;}
+.group input,.group select,.group textarea{background:#0d0d1a;color:#e2e8f0;border-color:rgba(100,116,139,.25);}
+.group input:focus,.group select:focus,.group textarea:focus{border-color:#6366f1;background:#0d0d1a;box-shadow:0 0 0 4px rgba(99,102,241,.2);}
+.group input::placeholder,.group textarea::placeholder{color:#4b5563;}
+.hint{color:#64748b;}
+.chip{border-color:rgba(100,116,139,.25);background:#0d0d1a;color:#94a3b8;}
+.chip:active,.chip.active{background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(99,102,241,.3);}
+.wa-save-btn{background:linear-gradient(135deg,#252540,#1a1a2e);color:#a5b4fc;border:1px solid rgba(99,102,241,.25);}
+.wa-save-btn:active{background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;}
+.btn-wa{background:linear-gradient(135deg,#4f46e5,#6366f1);box-shadow:0 8px 24px -4px rgba(99,102,241,.5);}
+.btn-group{background:linear-gradient(135deg,#4f46e5,#6366f1);box-shadow:0 8px 24px -4px rgba(99,102,241,.5);}
+.btn-copy{background:#1a1a2e;color:#94a3b8;border:1.5px solid rgba(100,116,139,.25);}
+.note{color:#64748b;}
+.surat-preview{background:#1a1a2e;border:1.5px solid rgba(99,102,241,.3);box-shadow:0 4px 20px rgba(0,0,0,.5);}
+.surat-preview-header{background:linear-gradient(135deg,#4f46e5,#6366f1);}
+.surat-preview-body{background:linear-gradient(180deg,#0d0d1a 0%,#1a1a2e 30%);color:#cbd5e1;}
+.surat-preview-empty{color:#64748b;}
+.surat-preview-empty strong{color:#818cf8;}
+.surat-deco-top{color:#a5b4fc;}
+.surat-deco-school{color:#818cf8;}
+.surat-deco-line{background:linear-gradient(90deg,transparent,rgba(99,102,241,.3),#6366f1,rgba(99,102,241,.3),transparent);}
+.surat-deco-row span{color:#8892a4;}
+.surat-deco-row b{color:#e2e8f0;}
+.surat-jenis-tag{background:rgba(99,102,241,.18);color:#a5b4fc;}
+.surat-deco-alasan-label{color:#8892a4;}
+.surat-deco-alasan{background:rgba(99,102,241,.08);border-left:3px solid #6366f1;color:#cbd5e1;}
+.surat-deco-sign{color:#94a3b8;}
+.surat-deco-sign b{color:#e2e8f0;}
+.surat-deco-sign i{color:#64748b;}
+.surat-deco-bottom{color:#64748b;}
+.history-card{background:#1a1a2e;border:1.5px solid rgba(100,116,139,.2);box-shadow:0 2px 12px rgba(0,0,0,.4);}
+.history-title{color:#e2e8f0;}
+.history-clear{color:#f87171;background:rgba(239,68,68,.12);}
+.history-empty{color:#64748b;}
+.history-item{background:#0d0d1a;border:1px solid rgba(100,116,139,.15);}
+.hi-jenis{color:#a5b4fc;background:rgba(99,102,241,.15);}
+.hi-date{color:#64748b;}
+.hi-alasan{color:#94a3b8;}
+.hi-reuse{color:#818cf8;}
+.national-section{background:#1a1a2e;border:1.5px solid rgba(100,116,139,.2);}
+.section-tab-header{border-bottom:2px solid rgba(100,116,139,.15);}
+.tab-btn{background:#0d0d1a;color:#64748b;}
+.tab-btn.active{background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;}
+.pancasila-item{color:#cbd5e1;}
+.pancasila-num{background:linear-gradient(135deg,#4f46e5,#6366f1);}
+.janji-item{color:#94a3b8;border-left-color:#6366f1;}
+.footer-copyright{color:#4b5563;}
+.bottom-nav{background:rgba(15,15,26,.95);border-top:1px solid rgba(100,116,139,.2);box-shadow:0 -8px 32px rgba(0,0,0,.5);}
+.nav-item{color:#64748b;}
+.nav-item.active{color:#818cf8;}
+.nav-item.active .nav-icon{filter:drop-shadow(0 2px 4px rgba(99,102,241,.4));}
+
+</style>
+</head>
+<body>
+<div class="app-container">
+
+<!-- PAGE: FORM IZIN -->
+<div class="page active" id="pageForm">
+  <div class="splash" id="splash">
+    <video class="splash-video" id="splashVideo" autoplay loop playsinline preload="auto" poster="">
+      <source src="https://files.catbox.moe/lvh069.mp4" type="video/mp4">
+    </video>
+    <div class="splash-scrim"></div>
+    <div class="splash-content">
+      <div class="splash-emoji" id="emoji">👋</div>
+      <div class="splash-greeting" id="greeting">Halo, Selamat Pagi</div>
+      <div class="splash-sub">SMK Bandara — Form, Tools & Belajar</div>
+      <div class="splash-bar"></div>
+      <button type="button" class="splash-sound-hint" id="splashSoundBtn">🔊 Ketuk untuk suara</button>
+      <button type="button" class="splash-skip" id="splashSkipBtn">Lanjut →</button>
+    </div>
+  </div>
+  <div class="header">
+    <img src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=600&q=75&fm=webp" width="600" height="338" alt="SMK Bandara" loading="eager" decoding="async" onerror="this.style.display='none'">
+    <div class="header-overlay">
+      <div class="school">SMK BANDARA • Pariwisata & Bisnis Manajemen</div>
+      <h1>Form Izin Absen Kelas</h1>
+    </div>
+  </div>
+  <div class="header-line"></div>
+  <div class="motto-banner" id="mottoBanner" onclick="changeMotto()" role="button" tabindex="0">
+    <span class="motto-badge">Slogan</span>
+    <span class="motto-text" id="mottoText">🇮🇩 Anak Indonesia Hebat • Cerdas & Berkarakter!</span>
+  </div>
+  <div class="body">
+    <form id="formIzin">
+      <div class="form-card">
+        <div class="group"><label>Nama Lengkap</label><input type="text" id="nama" placeholder="Contoh: Ahmad Rizki" required autocomplete="name" enterkeyhint="next"></div>
+        <div class="group"><label>Kelas</label><input type="text" id="kelas" placeholder="Contoh: X AK 1" required enterkeyhint="next"></div>
+      </div>
+      <div class="form-card">
+        <div class="group">
+          <label>Nomor WA Wali Kelas <span style="font-weight:400;color:#94a3b8">(opsional)</span></label>
+          <div class="wa-row"><input type="tel" id="waNumber" placeholder="08xxxxxxxxxx" inputmode="numeric"><button type="button" class="wa-save-btn" id="saveWaBtn">Simpan</button></div>
+          <p class="hint">Kalau diisi, tombol kirim langsung ke nomor ini.</p>
+        </div>
+        <div class="group">
+          <label>Link Grup Kelas</label>
+          <input type="url" id="groupLink" value="https://chat.whatsapp.com/DwMi8nxB2XS3JpxSvgvpUK" placeholder="https://chat.whatsapp.com/...">
+          <p class="hint">Tombol grup akan salin surat + buka grup.</p>
+        </div>
+      </div>
+      <div class="form-card">
+        <div class="group"><label>Tanggal Izin</label><input type="date" id="tanggal" required></div>
+        <div class="group">
+          <label>Jenis Kehadiran</label>
+          <select id="jenis" required>
+            <option value="">-- Pilih Jenis Izin --</option>
+            <option value="Sakit">Sakit</option><option value="Izin">Izin</option><option value="Dispensasi">Dispensasi</option><option value="Lainnya">Lainnya</option>
+          </select>
+        </div>
+        <div class="group">
+          <label>Alasan / Keterangan</label>
+          <textarea id="alasan" placeholder="Jelaskan alasan izin secara singkat..." required enterkeyhint="send"></textarea>
+          <div class="quick-reasons" id="quickReasons">
+            <button type="button" class="chip" data-alasan="Sedang sakit demam dan perlu istirahat di rumah.">🤒 Demam</button>
+            <button type="button" class="chip" data-alasan="Ada urusan keluarga yang tidak bisa ditinggalkan.">👨‍👩‍👧 Keluarga</button>
+            <button type="button" class="chip" data-alasan="Sedang berobat ke dokter / puskesmas.">🏥 Berobat</button>
+            <button type="button" class="chip" data-alasan="Mengikuti kegiatan resmi di luar sekolah.">📋 Kegiatan</button>
+            <button type="button" class="chip" data-alasan="Kendala transportasi / cuaca buruk.">🌧️ Cuaca</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview surat otomatis -->
+      <div class="surat-preview" id="suratPreview">
+        <div class="surat-preview-header">
+          <div class="surat-preview-title">📄 Preview Surat Izin</div>
+          <span class="surat-preview-badge" id="suratStatus">Belum lengkap</span>
+        </div>
+        <div class="surat-preview-body" id="suratBody">
+          <div class="surat-preview-empty"><strong>Isi data di atas dulu</strong>Nama, kelas, tanggal, jenis & alasan akan otomatis jadi surat siap kirim.</div>
+        </div>
+      </div>
+
+      <div class="form-card" style="padding:14px 14px 16px;margin-top:4px">
+        <div class="btn-row">
+          <button type="button" class="btn btn-copy" id="copyBtn"><svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>Salin</button>
+          <button type="button" class="btn btn-wa" id="sendWaliBtn"><svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99 0-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>Kirim ke Wali</button>
+        </div>
+        <div class="btn-row" style="margin-top:10px">
+          <button type="button" class="btn btn-group" id="sendGroupBtn"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99 0-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>Kirim ke Grup Kelas</button>
+        </div>
+      </div>
+    </form>
+    <p class="note">Data nama, kelas & link grup otomatis tersimpan di HP kamu</p>
+    <div class="history-card">
+      <div class="history-header"><div class="history-title">📋 Riwayat Izin</div><button type="button" class="history-clear" id="clearHistoryBtn">Hapus</button></div>
+      <div id="historyList"><div class="history-empty">Belum ada riwayat izin</div></div>
+    </div>
+    <div class="video-card">
+      <video id="promoVideo" autoplay loop muted playsinline preload="auto"><source src="qvp3rt.mp4" type="video/mp4"><source src="https://files.catbox.moe/qvp3rt.mp4" type="video/mp4"></video>
+      <div class="video-overlay"><div class="video-title">🎬 Semangat Belajar!</div><button class="sound-btn" id="soundBtn" type="button" onclick="toggleSound()">🔊 Suara Off</button></div>
+    </div>
+    <div class="national-section">
+      <div class="section-tab-header">
+        <button class="tab-btn active" type="button" onclick="switchTab('pancasila',event)">🇲🇨 Pancasila</button>
+        <button class="tab-btn" type="button" onclick="switchTab('janji',event)">📜 Ikrar</button>
+        <button class="tab-btn" type="button" onclick="switchTab('karakter',event)">💎 Karakter</button>
+      </div>
+      <div id="pancasila" class="tab-content active">
+        <div class="pancasila-item"><div class="pancasila-num">1</div><div>Ketuhanan Yang Maha Esa</div></div>
+        <div class="pancasila-item"><div class="pancasila-num">2</div><div>Kemanusiaan yang adil dan beradab</div></div>
+        <div class="pancasila-item"><div class="pancasila-num">3</div><div>Persatuan Indonesia</div></div>
+        <div class="pancasila-item"><div class="pancasila-num">4</div><div>Kerakyatan yang dipimpin oleh hikmat kebijaksanaan dalam permusyawaratan/perwakilan</div></div>
+        <div class="pancasila-item"><div class="pancasila-num">5</div><div>Keadilan sosial bagi seluruh rakyat Indonesia</div></div>
+      </div>
+      <div id="janji" class="tab-content">
+        <div class="janji-item" style="border-left:none;padding-left:0;font-weight:700;color:#0f172a;margin-bottom:12px">Kami Pelajar Indonesia, berikrar untuk:</div>
+        <div class="janji-item">1. Belajar dengan baik</div><div class="janji-item">2. Menghormati orang tua</div><div class="janji-item">3. Menghormati guru</div><div class="janji-item">4. Rukun sama teman</div><div class="janji-item">5. Mencintai tanah air Indonesia</div>
+      </div>
+      <div id="karakter" class="tab-content">
+        <div class="janji-item" style="border-left:none;padding-left:0;font-weight:700;color:#0f172a;margin-bottom:12px">Profil Pelajar Pancasila — 6 Dimensi:</div>
+        <div class="pancasila-item"><div class="pancasila-num">1</div><div><strong>Beriman & Bertakwa</strong> — Akhlak mulia kepada Tuhan, sesama, & alam</div></div>
+        <div class="pancasila-item"><div class="pancasila-num">2</div><div><strong>Berkebinekaan Global</strong> — Mengenal & menghargai budaya lokal & global</div></div>
+        <div class="pancasila-item"><div class="pancasila-num">3</div><div><strong>Bergotong Royong</strong> — Kerja sama, kepedulian, & berbagi</div></div>
+        <div class="pancasila-item"><div class="pancasila-num">4</div><div><strong>Mandiri</strong> — Bertanggung jawab atas proses & hasil belajar</div></div>
+        <div class="pancasila-item"><div class="pancasila-num">5</div><div><strong>Bernalar Kritis</strong> — Menganalisis & menyimpulkan secara objektif</div></div>
+        <div class="pancasila-item"><div class="pancasila-num">6</div><div><strong>Kreatif</strong> — Menghasilkan gagasan & karya orisinal</div></div>
+      </div>
+    </div>
+    <div class="smart-card">
+      <div class="smart-header"><span class="smart-tag">Mindset Check</span><span class="smart-title">Cerdas vs Konyol</span></div>
+      <p class="smart-desc">Masa depanmu terlalu berharga untuk dihancurkan hal-hal bodoh.</p>
+      <div class="comparison-grid">
+        <div class="comp-box comp-bad"><strong class="comp-title">❌ Pilihan Konyol:</strong>Narkoba, tawuran, & merokok cuma bikin rugi.</div>
+        <div class="comp-box comp-good"><strong class="comp-title">💡 Anak Cerdas:</strong>Fokus keahlian, jaga kesehatan, & bikin bangga orang tua.</div>
+      </div>
+    </div>
+    <div class="footer-copyright">© SMK Bandara • Generasi Hebat & Berkarakter</div>
+  </div>
+</div>
+
+<!-- PAGE: CHAT -->
+<div class="page" id="pageChat">
+  <div class="chat-page">
+    <div class="chat-header">
+      <div class="chat-header-avatar">10</div>
+      <div class="chat-header-info">
+        <div class="chat-header-title">Chat Global 10 Akuntansi</div>
+        <div class="chat-header-sub">Credits by Moan10Akuntansi</div>
+        <div class="chat-header-status">Online</div>
+      </div>
+    </div>
+    <div class="chat-messages" id="chatMessages"><div class="chat-system">👋 Selamat datang di Chat Global 10 Akuntansi<br><span style="opacity:.7">Credits by Moan10Akuntansi</span></div></div>
+    <div class="chat-input-bar"><input type="text" id="chatInput" placeholder="Tulis pesan..." maxlength="500" autocomplete="off"><button type="button" class="chat-send-btn" id="chatSendBtn">➤</button></div>
+  </div>
+</div>
+
+<!-- PAGE: TOOLS -->
+<div class="page" id="pageTools">
+  <div class="tools-page">
+    <div class="tools-page-header">
+      <div class="tools-page-icon">🛠️</div>
+      <div><div class="tools-page-title">DASHBOARD TOOLS</div><div class="tools-page-sub">Kumpulan tools berguna buat kamu</div></div>
+    </div>
+    <div class="tools-grid">
+      <div class="tool-card" id="cardTt" onclick="openTool('tt')"><div class="tool-card-icon">🎵</div><div class="tool-card-name">TikTok DL</div><div class="tool-card-desc">Download video tanpa watermark</div><span class="tool-badge badge-hot">🔥 HOT</span></div>
+      <div class="tool-card" id="cardQr" onclick="openTool('qr')"><div class="tool-card-icon">📷</div><div class="tool-card-name">QR Generator</div><div class="tool-card-desc">Teks, link, foto &amp; video</div><span class="tool-badge badge-new">✨ NEW</span></div>
+      <div class="tool-card" id="cardLs" onclick="openTool('ls')"><div class="tool-card-icon">🔗</div><div class="tool-card-name">Perpendek Link</div><div class="tool-card-desc">Perpendek URL panjang</div><span class="tool-badge badge-new">✨ NEW</span></div>
+      <div class="tool-card" id="cardB64" onclick="openTool('b64')"><div class="tool-card-icon">🔐</div><div class="tool-card-name">Base64</div><div class="tool-card-desc">Encode / decode Base64</div><span class="tool-badge badge-new">✨ NEW</span></div>
+    </div>
+
+    <!-- TikTok Panel -->
+    <div class="tt-panel" id="panelTt">
+      <div class="tt-panel-header">
+        <span style="font-size:1.3rem">🎵</span>
+        <div class="tt-panel-title">TIKTOK DOWNLOADER</div>
+      </div>
+      <div class="tt-search-box">
+        <input class="tt-url-input" id="ttUrl" type="url" placeholder="tempel url tiktok di sini..." inputmode="url">
+        <button class="tt-dl-btn" id="ttDlBtn">⬇ DOWNLOAD</button>
+      </div>
+      <div class="tt-error" id="ttError"></div>
+      <div id="ttEmpty" class="tt-empty">
+        <span style="font-size:3rem;display:block;margin-bottom:12px">🎵</span>
+        <div class="tt-empty-title">TikTok Downloader</div>
+        <div class="tt-empty-sub">tempel url tiktok untuk preview<br>dan simpan tanpa watermark</div>
+      </div>
+      <div class="tt-result" id="ttResult">
+        <div class="tt-video-header"><span class="tt-video-label">▶ VIDEO PREVIEW</span><span class="tt-dur-badge" id="ttDur"></span></div>
+        <div class="tt-video-wrap"><video id="ttVideo" controls playsinline preload="metadata"></video></div>
+        <div class="tt-actions">
+          <a class="tt-btn-save" id="ttSaveBtn" href="#" download>⬇ SIMPAN</a>
+          <button class="tt-btn-share" id="ttShareBtn">↗ SHARE</button>
+        </div>
+        <div class="tt-info-card">
+          <div class="tt-info-label">CREATOR</div>
+          <div class="tt-author-row">
+            <div class="tt-avatar-placeholder" id="ttAvatar">👤</div>
+            <div><div class="tt-author-name" id="ttAuthorName"></div><div class="tt-author-nick" id="ttAuthorNick"></div></div>
+            <span class="tt-region-badge" id="ttRegion"></span>
+          </div>
+          <div class="tt-divider"></div>
+          <div class="tt-caption" id="ttCaption"></div>
+          <div class="tt-stats-row" id="ttStats"></div>
+        </div>
+        <div class="tt-music-card" id="ttMusicCard" style="display:none">
+          <div class="tt-music-header"><span style="font-size:.9rem">🎵</span><span class="tt-music-label">MUSIK</span></div>
+          <div class="tt-music-row"><div class="tt-music-icon">💿</div><div><div class="tt-music-title" id="ttMusicTitle"></div><div class="tt-music-author" id="ttMusicAuthor"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QR Panel -->
+    <div class="gen-panel" id="panelQr">
+      <div class="gen-panel-title">📷 QR Code Generator</div>
+      <div class="b64-tabs" style="margin-bottom:14px">
+        <button type="button" class="b64-tab active" id="qrTabText" onclick="switchQrMode('text')">📝 Teks / Link</button>
+        <button type="button" class="b64-tab" id="qrTabFile" onclick="switchQrMode('file')">📁 Upload File</button>
+      </div>
+      <div id="qrModeText">
+        <input class="gen-input" id="qrInput" type="text" placeholder="Masukkan teks atau link...">
+        <button class="gen-btn" type="button" onclick="generateQR()">Generate QR Code</button>
+      </div>
+      <div id="qrModeFile" style="display:none">
+        <label class="qr-upload-zone" id="qrUploadZone" for="qrFileInput">
+          <span class="qr-upload-icon">📤</span>
+          <span class="qr-upload-title">Pilih foto atau video</span>
+          <span class="qr-upload-sub">JPG, PNG, GIF, MP4, WEBM · max ~200MB</span>
+        </label>
+        <input type="file" id="qrFileInput" accept="image/*,video/*" style="display:none">
+        <div id="qrFileInfo" class="qr-file-info" style="display:none">
+          <div class="qr-file-name" id="qrFileName"></div>
+          <div class="qr-file-meta" id="qrFileMeta"></div>
+        </div>
+        <button class="gen-btn" type="button" id="qrUploadBtn" onclick="generateQRFromFile()" disabled>Upload &amp; Buat QR</button>
+        <p class="hint" style="margin-top:8px;text-align:center">File diupload sementara → link masuk ke QR. Scan QR untuk buka foto/video.</p>
+      </div>
+      <div class="gen-result" id="qrResult">
+        <img id="qrImg" src="" alt="QR">
+        <div id="qrLinkWrap" style="display:none;margin:8px 0 10px">
+          <div class="gen-result-label">LINK FILE</div>
+          <div class="gen-result-val" id="qrFileLink" style="font-size:.75rem"></div>
+        </div>
+        <a class="gen-copy-btn" id="qrDl" href="#" download="qrcode.png" style="display:inline-block;text-decoration:none;margin-right:8px">⬇ Download QR</a>
+        <button type="button" class="gen-copy-btn" id="qrCopyLink" style="display:none;border:none;cursor:pointer" onclick="copyQrLink()">📋 Salin Link</button>
+      </div>
+    </div>
+
+    <!-- Link Shortener Panel -->
+    <div class="gen-panel" id="panelLs">
+      <div class="gen-panel-title">🔗 Perpendek Link</div>
+      <input class="gen-input" id="lsInput" type="url" placeholder="Paste URL panjang di sini..." inputmode="url">
+      <button class="gen-btn" onclick="shortenLink()">Perpendek Link</button>
+      <div class="gen-result" id="lsResult">
+        <div class="gen-result-label">LINK PENDEK KAMU:</div>
+        <div class="gen-result-val" id="lsShortUrl"></div>
+        <button class="gen-copy-btn" onclick="copyShortLink()">Salin Link</button>
+      </div>
+    </div>
+
+    <!-- Base64 Panel -->
+    <div class="gen-panel" id="panelB64">
+      <div class="gen-panel-title">🔐 Base64 Encoder / Decoder</div>
+      <div class="b64-tabs"><button class="b64-tab active" id="b64EncTab" onclick="setB64Mode('enc')">Encode</button><button class="b64-tab" id="b64DecTab" onclick="setB64Mode('dec')">Decode</button></div>
+      <textarea class="gen-textarea" id="b64Input" placeholder="Masukkan teks di sini..."></textarea>
+      <button class="gen-btn" onclick="runB64()">Proses</button>
+      <div class="gen-output" id="b64Output"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: BELAJAR -->
+<div class="page" id="pageBelajar">
+  <div class="belajar-page">
+    <div class="belajar-header">
+      <div class="belajar-header-top"><span class="belajar-icon">📚</span><div><div class="belajar-title">Belajar Bareng</div><div class="belajar-sub">Materi Kelas X — SMK/SMA Semester 1 & 2</div></div></div>
+    </div>
+    <div class="belajar-mode-toggle">
+      <button class="bmode-btn active" id="bmodeMateri" onclick="switchBmode('materi')">📖 Baca Materi</button>
+      <button class="bmode-btn" id="bmodeQuiz" onclick="switchBmode('quiz')">🎯 Latihan Soal</button>
+    </div>
+    <div id="bmMateri">
+    <div class="belajar-search"><span class="belajar-search-icon">🔍</span><input type="text" id="mapelSearch" placeholder="Cari mata pelajaran..." oninput="filterMapel(this.value)"></div>
+
+    <div class="mapel-section" id="mapelSection">
+      <div class="mapel-section-title">Sains & Teknologi</div>
+      <div class="mapel-grid">
+        <div class="tool-card mapel-card" style="--mc:#ef4444;--mc-rgb:239,68,68;--mc2:#dc2626;" onclick="openMapel('ipa')" id="mc-ipa"><span class="mapel-icon">🔬</span><div class="mapel-name">IPA</div><div class="mapel-kelas"><span class="mapel-dot" style="--mc:#ef4444"></span>Kelas X</div></div>
+        <div class="tool-card mapel-card" style="--mc:#f59e0b;--mc-rgb:245,158,11;--mc2:#d97706;" onclick="openMapel('mat')" id="mc-mat"><span class="mapel-icon">📐</span><div class="mapel-name">Matematika</div><div class="mapel-kelas"><span class="mapel-dot" style="--mc:#f59e0b"></span>Kelas X</div></div>
+      </div>
+      <div class="mapel-section-title">Ilmu Sosial</div>
+      <div class="mapel-grid">
+        <div class="tool-card mapel-card" style="--mc:#10b981;--mc-rgb:16,185,129;--mc2:#059669;" onclick="openMapel('ips')" id="mc-ips"><span class="mapel-icon">🌏</span><div class="mapel-name">IPS</div><div class="mapel-kelas"><span class="mapel-dot" style="--mc:#10b981"></span>Kelas X</div></div>
+        <div class="tool-card mapel-card" style="--mc:#3b82f6;--mc-rgb:59,130,246;--mc2:#2563eb;" onclick="openMapel('sejarah')" id="mc-sejarah"><span class="mapel-icon">🏛️</span><div class="mapel-name">Sejarah</div><div class="mapel-kelas"><span class="mapel-dot" style="--mc:#3b82f6"></span>Kelas X</div></div>
+      </div>
+      <div class="mapel-section-title">Kewarganegaraan & Karakter</div>
+      <div class="mapel-grid">
+        <div class="tool-card mapel-card" style="--mc:#8b5cf6;--mc-rgb:139,92,246;--mc2:#0284c7;" onclick="openMapel('ppkn')" id="mc-ppkn"><span class="mapel-icon">🇮🇩</span><div class="mapel-name">PPKn</div><div class="mapel-kelas"><span class="mapel-dot" style="--mc:#8b5cf6"></span>Kelas X</div></div>
+        <div class="tool-card mapel-card" style="--mc:#ec4899;--mc-rgb:236,72,153;--mc2:#db2777;" onclick="openMapel('pancasila')" id="mc-pancasila"><span class="mapel-icon">🦅</span><div class="mapel-name">Pend. Pancasila</div><div class="mapel-kelas"><span class="mapel-dot" style="--mc:#ec4899"></span>Kelas X</div></div>
+      </div>
+      <div class="mapel-section-title">Bahasa</div>
+      <div class="mapel-grid">
+        <div class="tool-card mapel-card" style="--mc:#0284c7;--mc-rgb:2,132,199;--mc2:#0369a1;" onclick="openMapel('bind')" id="mc-bind"><span class="mapel-icon">📖</span><div class="mapel-name">Bhs. Indonesia</div><div class="mapel-kelas"><span class="mapel-dot" style="--mc:#0284c7"></span>Kelas X</div></div>
+        <div class="tool-card mapel-card" style="--mc:#0891b2;--mc-rgb:8,145,178;--mc2:#0e7490;" onclick="openMapel('bing')" id="mc-bing"><span class="mapel-icon">🌐</span><div class="mapel-name">Bhs. Inggris</div><div class="mapel-kelas"><span class="mapel-dot" style="--mc:#0891b2"></span>Kelas X</div></div>
+      </div>
+      <div class="mapel-section-title">Seni & Budaya</div>
+      <div class="mapel-grid">
+        <div class="tool-card mapel-card" style="--mc:#f97316;--mc-rgb:249,115,22;--mc2:#ea580c;" onclick="openMapel('senbud')" id="mc-senbud"><span class="mapel-icon">🎨</span><div class="mapel-name">Seni Budaya</div><div class="mapel-kelas"><span class="mapel-dot" style="--mc:#f97316"></span>Kelas X</div></div>
+      </div>
+    </div>
+
+    <!-- Materi Detail Panels -->
+    <div id="materiPanels"></div>
+    </div><!-- /bmMateri -->
+
+    <!-- QUIZ PANEL -->
+    <div class="quiz-panel" id="bmQuiz">
+      <div class="quiz-mapel-select">
+        <label>Pilih Mata Pelajaran</label>
+        <select class="quiz-select" id="quizMapelSelect">
+          <option value="ipa">🔬 IPA</option>
+          <option value="mat">📐 Matematika</option>
+          <option value="ips">🌏 IPS</option>
+          <option value="sejarah">🏛️ Sejarah</option>
+          <option value="ppkn">🇮🇩 PPKn</option>
+          <option value="pancasila">🦅 Pend. Pancasila</option>
+          <option value="bind">📖 Bahasa Indonesia</option>
+          <option value="bing">🌐 Bahasa Inggris</option>
+          <option value="senbud">🎨 Seni Budaya</option>
+        </select>
+        <select class="quiz-select" id="quizJumlahSelect" style="margin-top:8px">
+          <option value="10">10 Soal</option>
+          <option value="20">20 Soal</option>
+          <option value="30">30 Soal</option>
+        </select>
+        <button class="quiz-start-btn" onclick="startQuiz()">🎯 Mulai Latihan Soal</button>
+      </div>
+      <div class="quiz-box" id="quizBox">
+        <div class="quiz-prog-bar"><div class="quiz-prog-fill" id="quizProgFill" style="width:0%"></div></div>
+        <div class="quiz-header-info">
+          <span class="quiz-num-badge" id="quizNumBadge">Soal 1 / 10</span>
+          <span class="quiz-score-live" id="quizScoreLive">✅ 0 | ❌ 0</span>
+        </div>
+        <div class="quiz-question-wrap">
+          <div class="quiz-question-mapel" id="quizQMapel"></div>
+          <div class="quiz-question-text" id="quizQText"></div>
+          <div class="quiz-options" id="quizOptions"></div>
+        </div>
+        <div class="quiz-feedback" id="quizFeedback"></div>
+        <button class="quiz-next-btn" id="quizNextBtn" onclick="quizNext()">Soal Berikutnya →</button>
+        <div class="quiz-result-box" id="quizResult">
+          <div class="quiz-result-emoji" id="quizResultEmoji">🏆</div>
+          <div class="quiz-result-title" id="quizResultTitle">Quiz Selesai!</div>
+          <div class="quiz-result-score" id="quizResultScore">0/10</div>
+          <div class="quiz-result-sub" id="quizResultSub">Nilai kamu</div>
+          <div class="quiz-result-detail" id="quizResultDetail"></div>
+          <button class="quiz-retry-btn" onclick="startQuiz()">🔄 Ulangi Quiz</button>
+        </div>
+      </div>
+    </div><!-- /bmQuiz -->
+  </div>
+</div>
+
+</div><!-- /app-container -->
+
+<!-- Photo Viewer Modal -->
+<div class="photo-viewer-modal" id="photoViewerModal">
+  <button class="photo-viewer-close" onclick="closePhotoViewer()">✕</button>
+  <img class="photo-viewer-img" id="photoViewerImg" src="" alt="" style="display:none">
+  <video class="photo-viewer-video" id="photoViewerVideo" controls playsinline style="display:none"></video>
+  <div class="photo-viewer-label" id="photoViewerLabel"></div>
+  <div class="photo-viewer-actions">
+    <a class="photo-viewer-dl" id="photoViewerDl" href="#" download>⬇ Simpan</a>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <button type="button" class="nav-item active" data-page="pageForm" id="navForm"><span class="nav-icon">📝</span><span>Form Izin</span></button>
+  <button type="button" class="nav-item" data-page="pageChat" id="navChat"><span class="nav-icon">💬</span><span>Chat</span></button>
+  <button type="button" class="nav-item" data-page="pageTools" id="navTools"><span class="nav-icon">🛠️</span><span>Tools</span></button>
+  <button type="button" class="nav-item" data-page="pageBelajar" id="navBelajar"><span class="nav-icon">📚</span><span>Belajar</span></button>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+var STORAGE_KEY='smk_bandara_izin',HISTORY_KEY='smk_bandara_history',CHAT_KEY='smk_bandara_chat_v4',MAX_HISTORY=8,chatMemory=[],b64Mode='enc',ttLastUrl='',ttLastUrlHd='';
+var vid=document.getElementById('promoVideo'),sBtn=document.getElementById('soundBtn'),toastEl=document.getElementById('toast');
+
+function toast(msg){if(!toastEl)return;toastEl.textContent=msg;toastEl.classList.add('show');clearTimeout(toastEl._t);toastEl._t=setTimeout(function(){toastEl.classList.remove('show');},2500);}
+function sGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function sSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+
+/* Splash — suara aktif selama splash, mati setelah keluar */
+(function(){
+  var h=new Date().getHours();
+  var g=h<11?{text:'Halo, Selamat Pagi',emoji:'🌅'}:h<15?{text:'Halo, Selamat Siang',emoji:'☀️'}:h<19?{text:'Halo, Selamat Sore',emoji:'🌇'}:{text:'Halo, Selamat Malam',emoji:'🌙'};
+  var ge=document.getElementById('greeting'),ee=document.getElementById('emoji');
+  if(ge)ge.textContent=g.text;if(ee)ee.textContent=g.emoji;
+  var sv=document.getElementById('splashVideo');
+  var soundBtn=document.getElementById('splashSoundBtn');
+  var skipBtn=document.getElementById('splashSkipBtn');
+  var soundOn=false;
+
+  function tryPlayWithSound(){
+    if(!sv)return;
+    sv.muted=false;
+    var p=sv.play();
+    if(p&&p.then){
+      p.then(function(){
+        soundOn=true;
+        if(soundBtn){soundBtn.textContent='🔊 Suara aktif';soundBtn.classList.add('hide');}
+      }).catch(function(){
+        /* browser block — tetap tampilkan tombol suara */
+        sv.muted=true;
+        sv.play&&sv.play().catch(function(){});
+      });
+    }
+  }
+
+  function enableSound(){
+    if(!sv)return;
+    sv.muted=false;
+    sv.play&&sv.play().catch(function(){});
+    soundOn=true;
+    if(soundBtn){soundBtn.textContent='🔊 Suara aktif';setTimeout(function(){soundBtn.classList.add('hide');},600);}
+  }
+
+  function hideSplash(){
+    var s=document.getElementById('splash');
+    if(s)s.classList.add('hide');
+    /* matikan suara & pause video setelah keluar splash */
+    if(sv){
+      try{sv.muted=true;sv.pause();}catch(e){}
+    }
+  }
+
+  /* coba autoplay ber-suara dulu; jika gagal, user ketuk tombol */
+  if(sv){
+    sv.muted=false;
+    var p=sv.play();
+    if(p&&p.then){
+      p.then(function(){
+        soundOn=true;
+        if(soundBtn)soundBtn.classList.add('hide');
+      }).catch(function(){
+        sv.muted=true;
+        sv.play&&sv.play().catch(function(){});
+      });
+    }
+  }
+  if(soundBtn)soundBtn.addEventListener('click',function(e){e.stopPropagation();enableSound();});
+  if(skipBtn)skipBtn.addEventListener('click',function(){
+    if(!soundOn&&sv){/* kalau belum ada suara, tetap matikan saat keluar */sv.muted=true;}
+    hideSplash();
+  });
+})();
+
+/* Load saved */
+(function(){
+  try{var d=JSON.parse(sGet(STORAGE_KEY)||'{}');
+    if(d.nama)document.getElementById('nama').value=d.nama;
+    if(d.kelas)document.getElementById('kelas').value=d.kelas;
+    if(d.wa)document.getElementById('waNumber').value=d.wa;
+    if(d.groupLink)document.getElementById('groupLink').value=d.groupLink;
+  }catch(e){}
+  var t=document.getElementById('tanggal');if(t)t.valueAsDate=new Date();
+})();
+
+['nama','kelas'].forEach(function(id){var el=document.getElementById(id);if(!el)return;el.addEventListener('change',function(){try{var d=JSON.parse(sGet(STORAGE_KEY)||'{}');d[id]=el.value.trim();sSet(STORAGE_KEY,JSON.stringify(d));}catch(e){}});});
+document.getElementById('groupLink').addEventListener('change',function(){try{var d=JSON.parse(sGet(STORAGE_KEY)||'{}');d.groupLink=this.value.trim();sSet(STORAGE_KEY,JSON.stringify(d));}catch(e){}});
+document.getElementById('saveWaBtn').addEventListener('click',function(){var wa=document.getElementById('waNumber').value.trim().replace(/\D/g,'');if(wa&&wa.length<10){toast('Nomor WA terlalu pendek');return;}try{var d=JSON.parse(sGet(STORAGE_KEY)||'{}');d.wa=wa;sSet(STORAGE_KEY,JSON.stringify(d));toast(wa?'Nomor WA disimpan ✓':'Nomor WA dihapus');}catch(e){toast('Gagal menyimpan');}});
+document.getElementById('quickReasons').addEventListener('click',function(e){var chip=e.target.closest('.chip');if(!chip)return;document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('active');});chip.classList.add('active');document.getElementById('alasan').value=chip.getAttribute('data-alasan');if(typeof updateSuratPreview==='function')updateSuratPreview();});
+
+function buildSurat(){
+  var nama=document.getElementById('nama').value.trim(),kelas=document.getElementById('kelas').value.trim(),ti=document.getElementById('tanggal').value,jenis=document.getElementById('jenis').value,alasan=document.getElementById('alasan').value.trim();
+  if(!nama||!kelas||!ti||!jenis||!alasan)return null;
+  var opts={weekday:'long',year:'numeric',month:'long',day:'numeric'};
+  var tgl=new Date(ti+'T00:00:00').toLocaleDateString('id-ID',opts);
+  var text=
+'╭──────────────────────────╮\n'+
+'│  📋 *SURAT IZIN ABSEN*   │\n'+
+'│     *SMK BANDARA*        │\n'+
+'╰──────────────────────────╯\n'+
+'\n'+
+'📌 *Hal:* Permohonan Izin Ketidakhadiran\n'+
+'\n'+
+'Kepada Yth.\n'+
+'Bapak/Ibu Wali Kelas & Guru\n'+
+'*SMK BANDARA*\n'+
+'di tempat\n'+
+'\n'+
+'————————————————————\n'+
+'Dengan hormat,\n'+
+'Saya yang bertanda tangan di bawah ini:\n'+
+'\n'+
+'👤 *Nama*    : '+nama+'\n'+
+'🏫 *Kelas*   : '+kelas+'\n'+
+'📅 *Tanggal* : '+tgl+'\n'+
+'📝 *Jenis*   : *'+jenis+'*\n'+
+'\n'+
+'————————————————————\n'+
+'💬 *Alasan:*\n'+
+'_"'+alasan+'"_\n'+
+'————————————————————\n'+
+'\n'+
+'Mohon izin untuk tidak hadir pada tanggal tersebut. Atas perhatian dan pengertiannya, saya ucapkan terima kasih. 🙏\n'+
+'\n'+
+'Hormat saya,\n'+
+'*'+nama+'*\n'+
+'_'+kelas+'_\n'+
+'\n'+
+'✦ ─── SMK Bandara ─── ✦';
+  return{text:text,nama:nama,kelas:kelas,tanggal:tgl,jenis:jenis,alasan:alasan,tanggalRaw:ti};
+}
+
+function updateSuratPreview(){
+  var body=document.getElementById('suratBody'),badge=document.getElementById('suratStatus');
+  if(!body)return;
+  var s=buildSurat();
+  if(!s){
+    body.innerHTML='<div class="surat-preview-empty"><strong>Isi data di atas dulu</strong>Nama, kelas, tanggal, jenis &amp; alasan akan otomatis jadi surat siap kirim.</div>';
+    if(badge){badge.textContent='Belum lengkap';badge.style.background='rgba(255,255,255,.2)';}
+    return;
+  }
+  body.innerHTML=
+    '<div class="surat-deco">'+
+      '<div class="surat-deco-top">✦ ─── 📋 SURAT IZIN ABSEN ─── ✦</div>'+
+      '<div class="surat-deco-school">SMK BANDARA</div>'+
+      '<div class="surat-deco-line"></div>'+
+      '<div class="surat-deco-row"><span>👤 Nama</span><b>'+escHtml(s.nama)+'</b></div>'+
+      '<div class="surat-deco-row"><span>🏫 Kelas</span><b>'+escHtml(s.kelas)+'</b></div>'+
+      '<div class="surat-deco-row"><span>📅 Tanggal</span><b>'+escHtml(s.tanggal)+'</b></div>'+
+      '<div class="surat-deco-row"><span>📝 Jenis</span><b class="surat-jenis-tag">'+escHtml(s.jenis)+'</b></div>'+
+      '<div class="surat-deco-line"></div>'+
+      '<div class="surat-deco-alasan-label">💬 Alasan</div>'+
+      '<div class="surat-deco-alasan">"'+escHtml(s.alasan)+'"</div>'+
+      '<div class="surat-deco-line"></div>'+
+      '<div class="surat-deco-sign">Hormat saya,<br><b>'+escHtml(s.nama)+'</b><br><i>'+escHtml(s.kelas)+'</i></div>'+
+      '<div class="surat-deco-bottom">✦ ─── Terima kasih 🙏 ─── ✦</div>'+
+    '</div>';
+  if(badge){badge.textContent='Siap kirim ✓';badge.style.background='rgba(34,197,94,.35)';}
+}
+function escHtml(str){return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+['nama','kelas','tanggal','jenis','alasan'].forEach(function(id){
+  var el=document.getElementById(id);
+  if(el){el.addEventListener('input',updateSuratPreview);el.addEventListener('change',updateSuratPreview);}
+});
+updateSuratPreview();
+
+function copyText(text){
+  return new Promise(function(resolve,reject){
+    function fallback(){
+      try{
+        var ta=document.createElement('textarea');
+        ta.value=text;
+        ta.setAttribute('readonly','');
+        ta.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;padding:0;border:none;opacity:0.01;z-index:99999;';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        ta.setSelectionRange(0,ta.value.length);
+        var ok=document.execCommand('copy');
+        document.body.removeChild(ta);
+        if(ok)resolve();else reject(new Error('execCommand failed'));
+      }catch(e){reject(e);}
+    }
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(resolve).catch(function(){fallback();});
+    }else fallback();
+  });
+}
+
+function saveHistory(item){try{var list=JSON.parse(sGet(HISTORY_KEY)||'[]');list.unshift({nama:item.nama,kelas:item.kelas,jenis:item.jenis,alasan:item.alasan,tanggal:item.tanggal,tanggalRaw:item.tanggalRaw,waktu:new Date().toISOString()});if(list.length>MAX_HISTORY)list=list.slice(0,MAX_HISTORY);sSet(HISTORY_KEY,JSON.stringify(list));renderHistory();}catch(e){}}
+function renderHistory(){var box=document.getElementById('historyList');if(!box)return;var list=[];try{list=JSON.parse(sGet(HISTORY_KEY)||'[]');}catch(e){}if(!list.length){box.innerHTML='<div class="history-empty">Belum ada riwayat izin</div>';return;}box.innerHTML=list.map(function(h,i){return'<div class="history-item"><div class="hi-top"><span class="hi-jenis">'+h.jenis+'</span><span class="hi-date">'+h.tanggal+'</span></div><div class="hi-alasan">'+h.alasan+'</div><button type="button" class="hi-reuse" data-idx="'+i+'">Pakai lagi →</button></div>';}).join('');}
+renderHistory();
+
+document.getElementById('historyList').addEventListener('click',function(e){var btn=e.target.closest('.hi-reuse');if(!btn)return;var list=[];try{list=JSON.parse(sGet(HISTORY_KEY)||'[]');}catch(e){}var h=list[parseInt(btn.getAttribute('data-idx'),10)];if(!h)return;document.getElementById('jenis').value=h.jenis;document.getElementById('alasan').value=h.alasan;if(h.tanggalRaw)document.getElementById('tanggal').value=h.tanggalRaw;if(typeof updateSuratPreview==='function')updateSuratPreview();toast('Data riwayat dimuat ✓');document.getElementById('alasan').scrollIntoView({behavior:'smooth',block:'center'});});
+document.getElementById('clearHistoryBtn').addEventListener('click',function(){if(!confirm('Hapus semua riwayat izin?'))return;localStorage.removeItem(HISTORY_KEY);renderHistory();toast('Riwayat dihapus');});
+
+function prepareAndSave(s){try{var d=JSON.parse(sGet(STORAGE_KEY)||'{}');d.nama=s.nama;d.kelas=s.kelas;var gl=document.getElementById('groupLink');if(gl)d.groupLink=gl.value.trim();sSet(STORAGE_KEY,JSON.stringify(d));}catch(e){}saveHistory(s);}
+
+document.getElementById('copyBtn').addEventListener('click',function(){var s=buildSurat();if(!s){toast('Isi semua data dulu ya');return;}copyText(s.text).then(function(){toast('Teks surat disalin ✓');}).catch(function(){toast('Gagal salin — tahan teks di preview');});});
+document.getElementById('sendWaliBtn').addEventListener('click',function(){
+  var s=buildSurat();
+  if(!s){toast('Isi semua data dulu ya');document.getElementById('suratPreview').scrollIntoView({behavior:'smooth',block:'center'});return;}
+  prepareAndSave(s);
+  var wa=document.getElementById('waNumber').value.trim().replace(/\D/g,'');
+  if(wa.startsWith('0'))wa='62'+wa.slice(1);
+  /* wa.me dengan ?text= → pesan otomatis terisi di kolom chat */
+  var url=wa
+    ?'https://wa.me/'+wa+'?text='+encodeURIComponent(s.text)
+    :'https://wa.me/?text='+encodeURIComponent(s.text);
+  window.open(url,'_blank','noopener,noreferrer');
+  toast('Pesan surat terisi otomatis ✓');
+});
+document.getElementById('sendGroupBtn').addEventListener('click',function(){
+  var s=buildSurat();
+  if(!s){toast('Isi semua data dulu ya');document.getElementById('suratPreview').scrollIntoView({behavior:'smooth',block:'center'});return;}
+  prepareAndSave(s);
+  /* WA grup TIDAK bisa ?text= di link invite — pakai wa.me/?text= agar pesan terisi, lalu pilih grup */
+  var shareUrl='https://wa.me/?text='+encodeURIComponent(s.text);
+  copyText(s.text).then(function(){
+    toast('Pesan terisi · pilih chat/grup di WA');
+    setTimeout(function(){window.open(shareUrl,'_blank','noopener,noreferrer');},300);
+  }).catch(function(){
+    toast('Buka WA · pesan sudah terisi');
+    window.open(shareUrl,'_blank','noopener,noreferrer');
+  });
+});
+document.getElementById('formIzin').addEventListener('submit',function(e){e.preventDefault();});
+
+/* Video */
+if(vid){vid.muted=true;vid.play&&vid.play().catch(function(){});}
+window.toggleSound=function(){if(!vid||!sBtn)return;if(vid.muted){vid.muted=false;sBtn.textContent='🔊 Suara On';sBtn.style.background='#22c55e';}else{vid.muted=true;sBtn.textContent='🔊 Suara Off';sBtn.style.background='#0284c7';}};
+
+/* Tabs pancasila */
+window.switchTab=function(tabName,evt){document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});document.querySelectorAll('.tab-content').forEach(function(c){c.classList.remove('active');});if(evt&&evt.target){evt.target.classList.add('active');}var p=document.getElementById(tabName);if(p)p.classList.add('active');};
+
+/* Motto */
+var mottos=['🇮🇩 Anak Indonesia Hebat • Cerdas & Berkarakter!','🚫 Say No to Drugs • Narkoba Cuma Bikin Rugi!','🎓 Prestasi Tinggi, Budi Pekerti Terpuji!','✈️ SMK Bandara • Siap Kerja, Santun, Mandiri!'],mottoIdx=0,mottoEl=document.getElementById('mottoText');
+window.changeMotto=function(){if(!mottoEl)return;mottoEl.style.opacity=0;setTimeout(function(){mottoIdx=(mottoIdx+1)%mottos.length;mottoEl.textContent=mottos[mottoIdx];mottoEl.style.opacity=1;},250);};
+setTimeout(function(){setInterval(window.changeMotto,4500);},1500);
+
+/* Page nav */
+document.querySelectorAll('.nav-item').forEach(function(btn){btn.addEventListener('click',function(){var target=btn.getAttribute('data-page');document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});var page=document.getElementById(target);if(page)page.classList.add('active');btn.classList.add('active');window.scrollTo(0,0);if(target==='pageChat'){setTimeout(function(){bindChatEvents();loadChat();},50);}});});
+
+/* Chat */
+function getChatList(){try{var r=sGet(CHAT_KEY);if(r){var p=JSON.parse(r);if(Array.isArray(p)){chatMemory=p;return p;}}}catch(e){}return chatMemory.slice();}
+function saveChatList(list){chatMemory=list;try{sSet(CHAT_KEY,JSON.stringify(list.slice(-80)));}catch(e){}}
+function getChatName(){try{var r=sGet(STORAGE_KEY);if(r){var d=JSON.parse(r);if(d.nama&&String(d.nama).trim())return String(d.nama).trim();}}catch(e){}return'Anonim';}
+function fmtTime(iso){try{var d=new Date(iso);return('0'+d.getHours()).slice(-2)+'.'+('0'+d.getMinutes()).slice(-2);}catch(e){return'';}}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function loadChat(){var box=document.getElementById('chatMessages');if(!box)return;var list=getChatList(),my=getChatName(),html='<div class="chat-system">👋 Selamat datang di Chat Global 10 Akuntansi<br><span style="opacity:.7">Credits by Moan10Akuntansi</span></div>';list.forEach(function(msg){var isMe=msg.name===my;html+='<div class="chat-msg '+(isMe?'me':'them')+'">';if(!isMe)html+='<div class="chat-msg-name">'+esc(msg.name)+'</div>';html+=esc(msg.text||'');html+='<span class="chat-msg-time">'+fmtTime(msg.time)+'</span></div>';});box.innerHTML=html;box.scrollTop=box.scrollHeight;}
+function sendChat(){var inp=document.getElementById('chatInput');if(!inp)return;var text=inp.value.trim();if(!text){toast('Ketik pesan dulu');return;}var list=getChatList();list.push({name:getChatName(),text:text,time:new Date().toISOString()});saveChatList(list);inp.value='';loadChat();}
+function bindChatEvents(){var btn=document.getElementById('chatSendBtn'),inp=document.getElementById('chatInput');if(btn)btn.onclick=function(e){if(e){e.preventDefault();e.stopPropagation();}sendChat();};if(inp)inp.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();sendChat();}};}
+bindChatEvents();loadChat();
+
+/* ===== TOOLS: toggle panels ===== */
+var activeTool=null;
+var toolPanels={tt:'panelTt',qr:'panelQr',ls:'panelLs',b64:'panelB64'};
+var toolCards={tt:'cardTt',qr:'cardQr',ls:'cardLs',b64:'cardB64'};
+window.openTool=function(name){
+  if(activeTool===name){document.getElementById(toolPanels[name]).classList.remove('active');document.getElementById(toolCards[name]).classList.remove('active-tool');activeTool=null;return;}
+  Object.keys(toolPanels).forEach(function(k){document.getElementById(toolPanels[k]).classList.remove('active');document.getElementById(toolCards[k]).classList.remove('active-tool');});
+  document.getElementById(toolPanels[name]).classList.add('active');document.getElementById(toolCards[name]).classList.add('active-tool');activeTool=name;
+  setTimeout(function(){document.getElementById(toolPanels[name]).scrollIntoView({behavior:'smooth',block:'start'});},80);
+};
+
+/* ===== TikTok Downloader (FIXED v2) ===== */
+var ttDlBtn=document.getElementById('ttDlBtn'),ttUrlEl=document.getElementById('ttUrl'),ttErrorEl=document.getElementById('ttError'),ttEmptyEl=document.getElementById('ttEmpty'),ttResultEl=document.getElementById('ttResult'),ttVideoEl=document.getElementById('ttVideo');
+
+function ttShowErr(msg){if(!msg){ttErrorEl.style.display='none';ttErrorEl.textContent='';return;}ttErrorEl.style.display='block';ttErrorEl.textContent='⚠ '+msg;}
+function ttSetLoad(on){ttDlBtn.disabled=!!on;ttDlBtn.textContent=on?'⏳ MEMPROSES...':'⬇ DOWNLOAD';}
+function fmtNum(n){if(!n&&n!==0)return'-';n=parseInt(n,10);if(isNaN(n))return'-';if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return String(n);}
+
+/* Timeout without AbortSignal (avoids postMessage clone errors in WebView) */
+function fetchTimeout(url, opts, ms){
+  ms = ms || 18000;
+  var timer;
+  var timeout = new Promise(function(_, reject){
+    timer = setTimeout(function(){ reject(new Error('timeout '+ms+'ms')); }, ms);
+  });
+  return Promise.race([
+    fetch(url, opts || {}).then(function(r){ clearTimeout(timer); return r; }),
+    timeout
+  ]).catch(function(e){ clearTimeout(timer); throw e; });
+}
+
+function normalizeTikUrl(u){
+  u = (u||'').trim();
+  if(!u) return '';
+  // expand common short domains already resolved by APIs; just clean trailing junk
+  u = u.split('?')[0].split('#')[0];
+  if(!/^https?:\/\//i.test(u)) u = 'https://' + u;
+  return u;
+}
+
+async function tryTikwm(url){
+  var r = await fetchTimeout('https://www.tikwm.com/api/?url='+encodeURIComponent(url)+'&hd=1', {
+    method:'GET',
+    headers:{'Accept':'application/json'}
+  }, 20000);
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  var j = await r.json();
+  if(!(j && (j.code===0 || j.msg==='success') && j.data && (j.data.play || j.data.hdplay))){
+    throw new Error((j && j.msg) || 'no data');
+  }
+  var d = j.data;
+  return {
+    video: d.play || d.hdplay || '',
+    videoHd: d.hdplay || d.play || '',
+    title: d.title || '',
+    cover: d.cover || d.origin_cover || '',
+    author: {
+      name: (d.author && (d.author.nickname || d.author.unique_id)) || '',
+      nickname: (d.author && d.author.unique_id) ? '@'+d.author.unique_id : '',
+      avatar: (d.author && d.author.avatar) || ''
+    },
+    stats: {
+      views: d.play_count,
+      likes: d.digg_count,
+      comment: d.comment_count,
+      share: d.share_count,
+      save: d.collect_count
+    },
+    duration: d.duration || '',
+    music: {
+      title: (d.music_info && d.music_info.title) || '',
+      author: (d.music_info && d.music_info.author) || ''
+    },
+    region: 'ID'
+  };
+}
+
+async function tryTdown(url){
+  var r = await fetchTimeout('https://tdownv4.sl-bjs.workers.dev/?down='+encodeURIComponent(url), {
+    method:'GET',
+    headers:{'Accept':'application/json'}
+  }, 20000);
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  var j = await r.json();
+  var dl = j.download_url || j.video || j.play || (j.data && (j.data.play || j.data.download_url));
+  if(!dl) throw new Error((j && j.message) || 'no download_url');
+  var auth = j.author || {};
+  return {
+    video: dl,
+    videoHd: dl,
+    title: j.title || '',
+    cover: j.cover || '',
+    author: {
+      name: auth.nickname || auth.username || auth.name || '',
+      nickname: auth.username ? '@'+auth.username : '',
+      avatar: auth.avatar || ''
+    },
+    stats: {
+      views: auth.view_count || j.view_count,
+      likes: auth.like_count || j.like_count,
+      comment: j.comment_count,
+      share: j.share_count,
+      save: j.collect_count
+    },
+    duration: auth.duration || j.duration || '',
+    music: { title: j.music_title || '', author: j.music_author || '' },
+    region: 'ID'
+  };
+}
+
+async function tryTikly(url){
+  var r = await fetchTimeout('https://api.tiklydown.eu.org/api/download?url='+encodeURIComponent(url), {
+    method:'GET',
+    headers:{'Accept':'application/json'}
+  }, 18000);
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  var j = await r.json();
+  var video = (j.video && (j.video.noWatermark || j.video.playAddr || j.video.downloadAddr)) || j.video || j.play;
+  if(typeof video === 'object') video = video.noWatermark || video.playAddr || '';
+  if(!video) throw new Error((j && j.message) || 'no video');
+  var auth = j.author || j.user || {};
+  return {
+    video: video,
+    videoHd: video,
+    title: j.title || j.desc || '',
+    cover: j.cover || (j.video && j.video.cover) || '',
+    author: {
+      name: auth.nickname || auth.name || auth.unique_id || '',
+      nickname: auth.unique_id ? '@'+auth.unique_id : '',
+      avatar: auth.avatar || auth.avatarThumb || ''
+    },
+    stats: {
+      views: j.play_count || j.stats && j.stats.playCount,
+      likes: j.digg_count || j.stats && j.stats.diggCount,
+      comment: j.comment_count || j.stats && j.stats.commentCount,
+      share: j.share_count || j.stats && j.stats.shareCount,
+      save: j.collect_count
+    },
+    duration: j.duration || '',
+    music: {
+      title: (j.music && (j.music.title || j.music.musicName)) || '',
+      author: (j.music && j.music.author) || ''
+    },
+    region: 'ID'
+  };
+}
+
+async function tryCobalt(url){
+  var r = await fetchTimeout('https://api.cobalt.tools/', {
+    method:'POST',
+    headers:{
+      'Accept':'application/json',
+      'Content-Type':'application/json'
+    },
+    body: JSON.stringify({ url: url, videoQuality: '1080', filenameStyle: 'basic' })
+  }, 20000);
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  var j = await r.json();
+  // cobalt returns { status: 'tunnel'|'redirect', url: '...' } or picker
+  var video = j.url || (j.tunnel && j.tunnel.url) || '';
+  if(j.status === 'picker' && j.picker && j.picker[0]) video = j.picker[0].url || video;
+  if(!video) throw new Error((j && j.error && j.error.code) || j.text || 'no url');
+  return {
+    video: video,
+    videoHd: video,
+    title: j.filename || 'TikTok Video',
+    cover: '',
+    author: { name: 'Creator', nickname: '', avatar: '' },
+    stats: {},
+    duration: '',
+    music: { title: '', author: '' },
+    region: 'ID'
+  };
+}
+
+async function ttFetch(){
+  var raw = (ttUrlEl.value || '').trim();
+  if(!raw){ ttShowErr('URL tidak boleh kosong'); return; }
+  var url = normalizeTikUrl(raw);
+  if(!/tiktok\.com|vt\.tiktok|vm\.tiktok/i.test(url) && !/tiktok/i.test(raw)){
+    // still allow — some APIs accept short links
+  }
+  ttShowErr('');
+  ttSetLoad(true);
+  ttEmptyEl.style.display = 'none';
+  ttResultEl.style.display = 'none';
+
+  var data = null;
+  var errors = [];
+  var apis = [
+    { name: 'tikwm', fn: tryTikwm },
+    { name: 'tdown', fn: tryTdown },
+    { name: 'tikly', fn: tryTikly },
+    { name: 'cobalt', fn: tryCobalt }
+  ];
+
+  for(var i = 0; i < apis.length; i++){
+    try{
+      data = await apis[i].fn(url);
+      if(data && data.video) break;
+      errors.push(apis[i].name + ': no video');
+      data = null;
+    }catch(e){
+      errors.push(apis[i].name + ': ' + (e.message || String(e)).slice(0,80));
+      data = null;
+    }
+  }
+
+  ttSetLoad(false);
+
+  if(!data || !data.video){
+    ttShowErr('Gagal ambil video. Pastikan URL valid dan coba lagi beberapa detik.');
+    ttEmptyEl.style.display = 'block';
+    console.warn('TT errors:', errors.join(' | '));
+    return;
+  }
+
+  ttLastUrl = data.video;
+  ttLastUrlHd = data.videoHd || data.video;
+
+  ttVideoEl.src = data.video;
+  try{ ttVideoEl.load(); ttVideoEl.play().catch(function(){}); }catch(e){}
+
+  var saveBtn = document.getElementById('ttSaveBtn');
+  saveBtn.onclick = function(e){
+    e.preventDefault();
+    ttBlobDownload(ttLastUrlHd || ttLastUrl, 'tiktok_' + Date.now() + '.mp4');
+  };
+  // also set href for long-press
+  try{ saveBtn.href = ttLastUrlHd || ttLastUrl; saveBtn.setAttribute('download','tiktok.mp4'); }catch(e){}
+
+  var durEl = document.getElementById('ttDur');
+  durEl.textContent = data.duration ? ('⏱ ' + data.duration + 's') : '';
+
+  var auth = data.author || {};
+  document.getElementById('ttAuthorName').textContent = auth.name || auth.nickname || 'Creator';
+  document.getElementById('ttAuthorNick').textContent = (auth.nickname && auth.nickname !== auth.name) ? auth.nickname : '';
+  var av = document.getElementById('ttAvatar');
+  av.innerHTML = '';
+  if(auth.avatar){
+    var img = document.createElement('img');
+    img.src = auth.avatar;
+    img.className = 'tt-avatar';
+    img.onerror = function(){ av.textContent = '👤'; };
+    av.appendChild(img);
+  } else {
+    av.textContent = '👤';
+  }
+  document.getElementById('ttRegion').textContent = data.region || 'ID';
+  document.getElementById('ttCaption').textContent = data.title || 'Tanpa caption';
+
+  var st = data.stats || {};
+  var statItems = [
+    {icon:'👁', val: fmtNum(st.views)},
+    {icon:'❤️', val: fmtNum(st.likes)},
+    {icon:'💬', val: fmtNum(st.comment)},
+    {icon:'↗️', val: fmtNum(st.share)},
+    {icon:'🔖', val: fmtNum(st.save)}
+  ];
+  document.getElementById('ttStats').innerHTML = statItems.map(function(s){
+    return '<div class="tt-stat"><span class="tt-stat-icon">'+s.icon+'</span><span class="tt-stat-val">'+s.val+'</span></div>';
+  }).join('');
+
+  var mc = document.getElementById('ttMusicCard');
+  if(data.music && (data.music.title || data.music.author)){
+    document.getElementById('ttMusicTitle').textContent = data.music.title || '-';
+    document.getElementById('ttMusicAuthor').textContent = data.music.author || '-';
+    mc.style.display = 'block';
+  } else {
+    mc.style.display = 'none';
+  }
+
+  ttResultEl.style.display = 'block';
+  toast('✓ Video siap — tekan SIMPAN');
+}
+
+async function ttBlobDownload(url, filename){
+  toast('⏳ Menyiapkan download...');
+  try{
+    var res = await fetchTimeout(url, { mode: 'cors' }, 60000);
+    if(res.ok){
+      var blob = await res.blob();
+      var burl = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = burl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function(){ URL.revokeObjectURL(burl); document.body.removeChild(a); }, 3000);
+      toast('✅ Download dimulai!');
+      return;
+    }
+  }catch(e){}
+  window.open(url, '_blank', 'noopener');
+  toast('Tahan video lalu pilih Simpan / Download');
+}
+
+ttDlBtn.addEventListener('click',ttFetch);
+ttUrlEl.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();ttFetch();}});
+document.getElementById('ttShareBtn').addEventListener('click',function(){
+  if(!ttLastUrl){toast('Download dulu ya');return;}
+  if(navigator.share){navigator.share({title:'TikTok Video',url:ttLastUrl}).catch(function(){window.open(ttLastUrl,'_blank');});}
+  else{window.open(ttLastUrl,'_blank');}
+});
+
+/* ===== QR Generator ===== */
+var qrLastFileUrl='';
+window.switchQrMode=function(mode){
+  var isFile=mode==='file';
+  document.getElementById('qrTabText').classList.toggle('active',!isFile);
+  document.getElementById('qrTabFile').classList.toggle('active',isFile);
+  document.getElementById('qrModeText').style.display=isFile?'none':'block';
+  document.getElementById('qrModeFile').style.display=isFile?'block':'none';
+  document.getElementById('qrResult').style.display='none';
+  document.getElementById('qrLinkWrap').style.display='none';
+  document.getElementById('qrCopyLink').style.display='none';
+};
+function showQrImage(dataUrl){
+  var img=document.getElementById('qrImg'),res=document.getElementById('qrResult');
+  var qrApi='https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=8&data='+encodeURIComponent(dataUrl);
+  img.src=qrApi;
+  img.onload=function(){res.style.display='block';toast('QR code dibuat ✓');};
+  img.onerror=function(){toast('Gagal generate QR');};
+  document.getElementById('qrDl').href=qrApi;
+}
+window.generateQR=function(){
+  var val=document.getElementById('qrInput').value.trim();
+  if(!val){toast('Masukkan teks atau link dulu');return;}
+  qrLastFileUrl='';
+  document.getElementById('qrLinkWrap').style.display='none';
+  document.getElementById('qrCopyLink').style.display='none';
+  showQrImage(val);
+};
+(function(){
+  var input=document.getElementById('qrFileInput');
+  var btn=document.getElementById('qrUploadBtn');
+  var zone=document.getElementById('qrUploadZone');
+  if(!input)return;
+  function fmtSize(b){if(b<1024)return b+' B';if(b<1048576)return (b/1024).toFixed(1)+' KB';return (b/1048576).toFixed(1)+' MB';}
+  input.addEventListener('change',function(){
+    var f=input.files&&input.files[0];
+    if(!f){btn.disabled=true;document.getElementById('qrFileInfo').style.display='none';return;}
+    var isOk=/^(image|video)\//.test(f.type)||/\.(jpe?g|png|gif|webp|mp4|webm|mov)$/i.test(f.name);
+    if(!isOk){toast('Pilih foto atau video saja');input.value='';btn.disabled=true;return;}
+    if(f.size>210*1024*1024){toast('File terlalu besar (max ~200MB)');input.value='';btn.disabled=true;return;}
+    document.getElementById('qrFileName').textContent=f.name;
+    document.getElementById('qrFileMeta').textContent=fmtSize(f.size)+(f.type?' · '+f.type:'');
+    document.getElementById('qrFileInfo').style.display='block';
+    btn.disabled=false;
+  });
+  if(zone){
+    zone.addEventListener('dragover',function(e){e.preventDefault();zone.classList.add('dragover');});
+    zone.addEventListener('dragleave',function(){zone.classList.remove('dragover');});
+    zone.addEventListener('drop',function(e){
+      e.preventDefault();zone.classList.remove('dragover');
+      if(e.dataTransfer.files&&e.dataTransfer.files[0]){input.files=e.dataTransfer.files;input.dispatchEvent(new Event('change'));}
+    });
+  }
+})();
+function qrFetchUpload(url,formData,timeoutMs){
+  return new Promise(function(resolve,reject){
+    var ctrl=typeof AbortController!=='undefined'?new AbortController():null;
+    var t=setTimeout(function(){if(ctrl)try{ctrl.abort();}catch(e){}reject(new Error('timeout'));},timeoutMs||25000);
+    var opts={method:'POST',body:formData};
+    if(ctrl)opts.signal=ctrl.signal;
+    fetch(url,opts).then(function(res){
+      return res.text().then(function(text){clearTimeout(t);resolve({ok:res.ok,status:res.status,text:(text||'').trim()});});
+    }).catch(function(err){clearTimeout(t);reject(err);});
+  });
+}
+function qrXhrUpload(url,formData,timeoutMs){
+  return new Promise(function(resolve,reject){
+    var xhr=new XMLHttpRequest();
+    xhr.open('POST',url,true);
+    xhr.timeout=timeoutMs||25000;
+    xhr.onload=function(){resolve({ok:xhr.status>=200&&xhr.status<300,status:xhr.status,text:(xhr.responseText||'').trim()});};
+    xhr.onerror=function(){reject(new Error('network'));};
+    xhr.ontimeout=function(){reject(new Error('timeout'));};
+    xhr.send(formData);
+  });
+}
+function qrExtractUrl(text){
+  if(!text)return '';
+  var m=String(text).match(/https?:\/\/[^\s"'<>]+/i);
+  return m?m[0].replace(/[.,;)\]]+$/,''):'';
+}
+function qrCompressImage(file,maxSide,quality){
+  return new Promise(function(resolve){
+    if(!file.type||file.type.indexOf('image/')!==0||file.type==='image/gif'){resolve(file);return;}
+    var url=URL.createObjectURL(file);
+    var img=new Image();
+    img.onload=function(){
+      try{
+        var w=img.naturalWidth,h=img.naturalHeight;
+        var scale=Math.min(1,maxSide/Math.max(w,h));
+        var cw=Math.max(1,Math.round(w*scale)),ch=Math.max(1,Math.round(h*scale));
+        var canvas=document.createElement('canvas');
+        canvas.width=cw;canvas.height=ch;
+        var ctx=canvas.getContext('2d');
+        ctx.drawImage(img,0,0,cw,ch);
+        canvas.toBlob(function(blob){
+          URL.revokeObjectURL(url);
+          if(blob&&blob.size>0){
+            var name=(file.name||'photo').replace(/\.\w+$/,'')+'.jpg';
+            resolve(new File([blob],name,{type:'image/jpeg'}));
+          }else resolve(file);
+        },'image/jpeg',quality||0.82);
+      }catch(e){URL.revokeObjectURL(url);resolve(file);}
+    };
+    img.onerror=function(){URL.revokeObjectURL(url);resolve(file);};
+    img.src=url;
+  });
+}
+async function qrTryUploaders(file){
+  var errors=[];
+  if(/^image\//.test(file.type)&&file.size>80*1024){
+    try{file=await qrCompressImage(file,1280,0.8);}catch(e){}
+  }
+  try{
+    var fd1=new FormData();
+    fd1.append('reqtype','fileupload');
+    fd1.append('time','72h');
+    fd1.append('fileToUpload',file,file.name);
+    var r1=await qrFetchUpload('https://litterbox.catbox.moe/resources/internals/api.php',fd1,20000);
+    var u1=qrExtractUrl(r1.text);
+    if(u1)return u1;
+    errors.push('litterbox');
+  }catch(e){errors.push('litterbox');}
+  try{
+    var fd2=new FormData();
+    fd2.append('reqtype','fileupload');
+    fd2.append('fileToUpload',file,file.name);
+    var r2=await qrFetchUpload('https://catbox.moe/user/api.php',fd2,25000);
+    var u2=qrExtractUrl(r2.text);
+    if(u2)return u2;
+    errors.push('catbox');
+  }catch(e){errors.push('catbox');}
+  try{
+    var fd3=new FormData();
+    fd3.append('file',file,file.name);
+    var r3=await qrFetchUpload('https://0x0.st',fd3,25000);
+    var u3=qrExtractUrl(r3.text);
+    if(u3)return u3;
+    errors.push('0x0');
+  }catch(e){errors.push('0x0');}
+  try{
+    var fd4=new FormData();
+    fd4.append('reqtype','fileupload');
+    fd4.append('time','24h');
+    fd4.append('fileToUpload',file,file.name);
+    var r4=await qrXhrUpload('https://litterbox.catbox.moe/resources/internals/api.php',fd4,20000);
+    var u4=qrExtractUrl(r4.text);
+    if(u4)return u4;
+    errors.push('xhr');
+  }catch(e){errors.push('xhr');}
+  /* Foto kecil: data-URL langsung di QR (tanpa upload) */
+  if(/^image\//.test(file.type)&&file.size<=120*1024){
+    var dataUrl=await new Promise(function(res,rej){
+      var reader=new FileReader();
+      reader.onload=function(){res(reader.result);};
+      reader.onerror=function(){rej(new Error('read'));};
+      reader.readAsDataURL(file);
+    });
+    if(dataUrl&&dataUrl.length<2800)return dataUrl;
+  }
+  throw new Error(errors.join(','));
+}
+window.generateQRFromFile=async function(){
+  var input=document.getElementById('qrFileInput');
+  var f=input&&input.files&&input.files[0];
+  if(!f){toast('Pilih file dulu');return;}
+  var btn=document.getElementById('qrUploadBtn');
+  if(btn._busy)return;
+  btn._busy=true;
+  btn.disabled=true;
+  btn.textContent='Mengupload...';
+  toast('Upload file...');
+  /* buat objectURL lokal dulu buat preview */
+  if(_pvObjectUrl){try{URL.revokeObjectURL(_pvObjectUrl);}catch(e){}}
+  _pvObjectUrl=URL.createObjectURL(f);
+  var isVid=/^video\//.test(f.type)||/\.(mp4|webm|mov)$/i.test(f.name);
+  var fname=f.name;
+  try{
+    var url=await qrTryUploaders(f);
+    qrLastFileUrl=url.indexOf('http')===0?url:'';
+    if(qrLastFileUrl){
+      document.getElementById('qrFileLink').textContent=qrLastFileUrl;
+      document.getElementById('qrLinkWrap').style.display='block';
+      document.getElementById('qrCopyLink').style.display='inline-block';
+    }else{
+      document.getElementById('qrLinkWrap').style.display='none';
+      document.getElementById('qrCopyLink').style.display='none';
+    }
+    /* tambah tombol lihat foto */
+    var viewWrap=document.getElementById('qrViewWrap');
+    if(!viewWrap){
+      viewWrap=document.createElement('div');
+      viewWrap.id='qrViewWrap';
+      viewWrap.style.cssText='margin:10px 0;';
+      document.getElementById('qrResult').insertBefore(viewWrap,document.getElementById('qrDl'));
+    }
+    viewWrap.innerHTML='<button type="button" onclick="openPhotoViewer(\''+(_pvObjectUrl||qrLastFileUrl||url).replace(/'/g,"\\'")+"','"+fname.replace(/'/g,"\\'")+"',"+isVid+')" style="width:100%;padding:12px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;border:none;border-radius:50px;font-size:.88rem;font-weight:800;font-family:inherit;cursor:pointer;margin-bottom:10px;box-shadow:0 6px 18px rgba(16,185,129,.3);">📸 Lihat '+(isVid?'Video':'Foto')+'</button>';
+    showQrImage(url);
+  }catch(e){
+    console&&console.warn&&console.warn('QR upload fail',e);
+    /* fallback: tampilkan preview lokal langsung */
+    var viewWrap2=document.getElementById('qrViewWrap');
+    if(!viewWrap2){
+      viewWrap2=document.createElement('div');
+      viewWrap2.id='qrViewWrap';
+      viewWrap2.style.cssText='margin:10px 0;';
+      var res=document.getElementById('qrResult');
+      res.insertBefore(viewWrap2,document.getElementById('qrDl'));
+    }
+    viewWrap2.innerHTML='<button type="button" onclick="openPhotoViewer(\''+_pvObjectUrl.replace(/'/g,"\\'")+"','"+fname.replace(/'/g,"\\'")+"',"+isVid+')" style="width:100%;padding:12px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;border:none;border-radius:50px;font-size:.88rem;font-weight:800;font-family:inherit;cursor:pointer;margin-bottom:10px;">📸 Lihat '+(isVid?'Video':'Foto')+' (lokal)</button>';
+    document.getElementById('qrResult').style.display='block';
+    toast('Upload gagal — foto tetap bisa dilihat lokal.');
+  }finally{
+    btn._busy=false;
+    btn.disabled=false;
+    btn.textContent='Upload & Buat QR';
+  }
+};
+window.copyQrLink=function(){
+  if(!qrLastFileUrl){toast('Belum ada link');return;}
+  copyText(qrLastFileUrl).then(function(){toast('Link disalin ✓');}).catch(function(){toast('Gagal salin');});
+};
+
+/* ===== Photo Viewer ===== */
+var _pvObjectUrl='';
+window.openPhotoViewer=function(src,filename,isVideo){
+  var modal=document.getElementById('photoViewerModal');
+  var img=document.getElementById('photoViewerImg');
+  var vid=document.getElementById('photoViewerVideo');
+  var lbl=document.getElementById('photoViewerLabel');
+  var dl=document.getElementById('photoViewerDl');
+  img.style.display='none';
+  vid.style.display='none';
+  if(isVideo){
+    vid.src=src;
+    vid.style.display='block';
+    vid.play&&vid.play().catch(function(){});
+  }else{
+    img.src=src;
+    img.style.display='block';
+  }
+  lbl.textContent=filename||'';
+  dl.href=src;
+  dl.download=filename||'file';
+  modal.classList.add('active');
+  document.body.style.overflow='hidden';
+};
+window.closePhotoViewer=function(){
+  var modal=document.getElementById('photoViewerModal');
+  var vid=document.getElementById('photoViewerVideo');
+  modal.classList.remove('active');
+  document.body.style.overflow='';
+  try{vid.pause();vid.src='';}catch(e){}
+};
+document.getElementById('photoViewerModal').addEventListener('click',function(e){
+  if(e.target===this)window.closePhotoViewer();
+});
+
+/* ===== Link Shortener ===== */
+window.shortenLink=async function(){var val=document.getElementById('lsInput').value.trim();if(!val){toast('Masukkan URL dulu');return;}if(!val.startsWith('http')){toast('URL harus diawali https://');return;}toast('Memproses...');try{var res=await fetch('https://tinyurl.com/api-create.php?url='+encodeURIComponent(val));if(!res.ok)throw new Error('HTTP '+res.status);var short=await res.text();document.getElementById('lsShortUrl').textContent=short;document.getElementById('lsResult').style.display='block';toast('Link diperpendek ✓');}catch(e){toast('Gagal mempersingkat link. Coba lagi.');}};
+window.copyShortLink=function(){var url=document.getElementById('lsShortUrl').textContent;if(!url)return;copyText(url).then(function(){toast('Link disalin ✓');}).catch(function(){toast('Gagal menyalin');});};
+
+/* ===== Base64 ===== */
+window.setB64Mode=function(mode){b64Mode=mode;document.getElementById('b64EncTab').classList.toggle('active',mode==='enc');document.getElementById('b64DecTab').classList.toggle('active',mode==='dec');document.getElementById('b64Input').placeholder=mode==='enc'?'Masukkan teks biasa...':'Masukkan teks Base64...';document.getElementById('b64Output').style.display='none';};
+window.runB64=function(){var val=document.getElementById('b64Input').value;if(!val.trim()){toast('Masukkan teks dulu');return;}var out=document.getElementById('b64Output');try{var result=b64Mode==='enc'?btoa(unescape(encodeURIComponent(val))):decodeURIComponent(escape(atob(val)));out.textContent=result;out.style.display='block';toast(b64Mode==='enc'?'Teks di-encode ✓':'Teks di-decode ✓');}catch(e){toast('Gagal proses. Periksa input kamu.');}};
+
+/* ===== BELAJAR ===== */
+var MAPEL_DATA={
+ipa:{name:'IPA',icon:'🔬',color:'#ef4444',color2:'#dc2626',rgb:'239,68,68',materi:[
+  {title:'Hakikat Ilmu Sains',body:'Sains adalah proses dan produk. IPA mencakup biologi, kimia, fisika, dan ilmu bumi. Metode ilmiah: observasi → hipotesis → eksperimen → analisis → kesimpulan. Sikap ilmiah: objektif, jujur, kritis, dan terbuka.\n\n🔑 Kata Kunci: Metode ilmiah, hipotesis, variabel bebas, variabel terikat, variabel kontrol.',tag:'Bab 1'},
+  {title:'Zat dan Perubahannya',body:'Materi adalah segala sesuatu yang memiliki massa dan menempati ruang. Perubahan fisika tidak menghasilkan zat baru (es mencair). Perubahan kimia menghasilkan zat baru (pembakaran kayu).\n\nWujud zat: Padat → partikel rapat teratur. Cair → partikel rapat tidak teratur. Gas → partikel berjauhan.\n\n🔑 Rumus: Perubahan massa = konstan (Hukum Lavoisier)',tag:'Bab 2'},
+  {title:'Makhluk Hidup & Lingkungan',body:'Ciri-ciri makhluk hidup: bernapas, bergerak, tumbuh, berkembang biak, peka terhadap rangsang, memerlukan nutrisi, mengeluarkan zat sisa.\n\nEkosistem: komponen biotik (organisme) + abiotik (suhu, cahaya, air, tanah). Rantai makanan → jaring-jaring makanan → piramida energi.\n\n🔑 Produsen → Konsumen I → Konsumen II → Dekomposer',tag:'Bab 3'},
+  {title:'Energi & Perubahannya',body:'Energi adalah kemampuan untuk melakukan kerja. Hukum Kekekalan Energi: energi tidak dapat diciptakan atau dimusnahkan, hanya dapat diubah bentuknya.\n\nBentuk energi: kinetik (gerak), potensial (kedudukan), panas, cahaya, listrik, kimia, bunyi.\n\nRumus Energi Kinetik: Ek = ½mv²\nRumus Energi Potensial: Ep = mgh',tag:'Bab 4'},
+  {title:'Bumi & Alam Semesta',body:'Struktur bumi: inti dalam (padat Fe-Ni) → inti luar (cair) → mantel → kerak. Teori lempeng tektonik menjelaskan gempa bumi dan gunung berapi. Tata surya: Matahari sebagai pusat, 8 planet berurutan (Merkurius, Venus, Bumi, Mars, Jupiter, Saturnus, Uranus, Neptunus).\n\n🔑 Jarak Bumi-Matahari ≈ 150 juta km (1 AU)',tag:'Bab 5'},
+]},
+mat:{name:'Matematika',icon:'📐',color:'#f59e0b',color2:'#d97706',rgb:'245,158,11',materi:[
+  {title:'Eksponen & Logaritma',body:'Eksponen: aⁿ = a × a × ... × a (n kali). Sifat-sifat:\n• aᵐ × aⁿ = aᵐ⁺ⁿ\n• aᵐ ÷ aⁿ = aᵐ⁻ⁿ\n• (aᵐ)ⁿ = aᵐⁿ\n• a⁰ = 1\n• a⁻ⁿ = 1/aⁿ\n\nLogaritma: ᵃlog b = c ⟺ aᶜ = b\nSifat log: log(ab) = log a + log b\nlog(a/b) = log a - log b',tag:'Bab 1'},
+  {title:'Persamaan & Fungsi Kuadrat',body:'Bentuk umum: ax² + bx + c = 0 (a ≠ 0)\nRumus ABC: x = (-b ± √(b²-4ac)) / 2a\nDiskriminan D = b²-4ac:\n• D > 0: dua akar real berbeda\n• D = 0: dua akar real sama\n• D < 0: tidak ada akar real\n\nFungsi kuadrat: f(x) = ax² + bx + c\nTitik puncak: (-b/2a, -D/4a)\nSumbu simetri: x = -b/2a',tag:'Bab 2'},
+  {title:'Sistem Persamaan Linear',body:'SPLDV: sistem dua persamaan, dua variabel.\nMetode substitusi: nyatakan satu variabel dari persamaan 1, substitusi ke persamaan 2.\nMetode eliminasi: eliminasi satu variabel dengan penjumlahan/pengurangan.\nMetode grafik: cari titik potong dua garis.\n\n📌 Contoh: 2x + y = 10 dan x - y = 2 → x = 4, y = 2',tag:'Bab 3'},
+  {title:'Trigonometri',body:'Perbandingan trigonometri pada segitiga siku-siku:\n• sin α = depan/miring\n• cos α = samping/miring\n• tan α = depan/samping\n\nNilai istimewa:\n• sin 30° = ½, cos 30° = ½√3\n• sin 45° = cos 45° = ½√2\n• sin 60° = ½√3, cos 60° = ½\n\nIdentitas: sin²α + cos²α = 1',tag:'Bab 4'},
+  {title:'Statistika Dasar',body:'Ukuran pemusatan:\n• Mean (rata-rata): x̄ = Σx/n\n• Median: nilai tengah data terurut\n• Modus: data yang paling sering muncul\n\nUkuran penyebaran:\n• Jangkauan: data max - data min\n• Variansi: s² = Σ(xᵢ-x̄)²/n\n• Simpangan baku: s = √s²\n\n📌 Penyajian: tabel, diagram batang, lingkaran, garis',tag:'Bab 5'},
+]},
+ips:{name:'IPS',icon:'🌏',color:'#10b981',color2:'#059669',rgb:'16,185,129',materi:[
+  {title:'Interaksi Sosial & Lembaga Sosial',body:'Interaksi sosial adalah hubungan timbal balik antar individu/kelompok. Syarat: kontak sosial + komunikasi.\nBentuk interaksi: kooperatif (kerja sama), kompetitif (persaingan), konfliktif (konflik).\n\nLembaga sosial: pola perilaku yang mengatur kebutuhan pokok manusia. Jenis: keluarga, pendidikan, ekonomi, agama, politik.\n\n🔑 Sosialisasi = proses belajar menjadi anggota masyarakat',tag:'Bab 1'},
+  {title:'Ekonomi Dasar',body:'Ilmu ekonomi mempelajari cara manusia memenuhi kebutuhan yang tidak terbatas dengan sumber daya yang terbatas.\n\nKebutuhan: primer (sandang, pangan, papan), sekunder, tersier.\nKelangkaan → pilihan → biaya peluang (opportunity cost).\n\nSistem ekonomi: tradisional, komando (terpusat), pasar (liberal), campuran.\n\n📌 Hukum permintaan: harga naik → permintaan turun',tag:'Bab 2'},
+  {title:'Geografi Indonesia',body:'Indonesia: negara kepulauan (17.000+ pulau), antara 6°LU-11°LS dan 95°BT-141°BT. Letak strategis antara Samudra Hindia & Pasifik, benua Asia & Australia.\n\nSumber daya alam: migas, batubara, nikel, emas, hutan tropis, laut. Potensi bencana: gempa bumi, tsunami, gunung berapi, banjir.\n\n🔑 Indonesia masuk Ring of Fire (Cincin Api Pasifik)',tag:'Bab 3'},
+  {title:'Sejarah Peradaban Dunia',body:'Mesopotamia (Tigris-Efrat): tulisan cuneiform, kode Hammurabi. Mesir Kuno: hieroglif, piramida, firaun. India (Indus): kota terencana Mohenjo-daro. Cina: dinasti, tembok besar, kertas, kompas.\n\nPeradaban maritim: Yunani, Romawi, Persia → dasar demokrasi, hukum, filsafat modern.\n\n🔑 Peradaban muncul di tepi sungai besar (lembah sungai)',tag:'Bab 4'},
+  {title:'Permasalahan Sosial',body:'Masalah sosial adalah kondisi yang tidak diinginkan dan dirasakan oleh banyak orang, bertentangan dengan nilai/norma. Contoh: kemiskinan, pengangguran, kejahatan, konflik.\n\nFaktor penyebab: ekonomi, biologi, psikologi, kebudayaan.\n\nSolusi: program pemberdayaan masyarakat, pendidikan, jaminan sosial, penegakan hukum.\n\n📌 Kemiskinan → kesenjangan sosial → kriminalitas',tag:'Bab 5'},
+]},
+sejarah:{name:'Sejarah',icon:'🏛️',color:'#3b82f6',color2:'#2563eb',rgb:'59,130,246',materi:[
+  {title:'Manusia & Sejarah',body:'Sejarah adalah ilmu yang mempelajari peristiwa masa lalu yang terjadi pada manusia. Unsur sejarah: manusia (who), ruang (where), waktu (when).\n\nSumber sejarah: primer (langsung), sekunder (tidak langsung).\nJenis: tertulis (dokumen), lisan (cerita), benda (artefak).\n\nKronologi: urutan peristiwa berdasarkan waktu. Kronik: catatan peristiwa berdasarkan tahun.',tag:'Bab 1'},
+  {title:'Kehidupan Pra-aksara',body:'Praaksara = sebelum mengenal tulisan. Manusia purba Indonesia: Meganthropus, Pithecanthropus, Homo.\n\nZaman batu: Paleolitikum (berburu & meramu), Mesolitikum, Neolitikum (bercocok tanam), Megalitikum (bangunan besar).\nZaman logam: perunggu & besi → kapak, senjata, perhiasan.\n\n🔑 Food gathering → Food producing',tag:'Bab 2'},
+  {title:'Kerajaan Hindu-Buddha',body:'Masuknya Hindu-Buddha ke Indonesia melalui: teori Brahmana, Ksatria, Waisya, arus balik.\n\nKerajaan Hindu: Kutai (Kaltim, terpanjang), Tarumanegara, Majapahit (Raden Wijaya, Gajah Mada - Sumpah Palapa).\nKerajaan Buddha: Sriwijaya (pusat perdagangan & pendidikan).\n\n🔑 Majapahit = kerajaan Hindu terbesar, menyatukan Nusantara',tag:'Bab 3'},
+  {title:'Masuknya Islam di Indonesia',body:'Islam masuk abad 7-13 M melalui jalur perdagangan. Teori masuk: Gujarat (India), Arab, Persia, Tiongkok.\n\nWali Songo menyebarkan Islam di Jawa dengan cara damai (budaya, seni, wayang).\nKerajaan Islam: Samudra Pasai (Aceh, tertua), Demak, Mataram, Banten.\n\n🔑 Islam berkembang melalui pernikahan, perdagangan, tasawuf',tag:'Bab 4'},
+  {title:'Kolonialisme & Perlawanan',body:'VOC (1602) → penjajahan Belanda. Sistem tanam paksa (cultuurstelsel) oleh Van den Bosch mengakibatkan penderitaan rakyat.\n\nPerlawanan: Sultan Agung (Mataram), Pangeran Diponegoro (1825-1830), Thomas Matulessy (Pattimura), Cut Nyak Dien.\n\nKebangkitan nasional: Budi Utomo (1908), Sumpah Pemuda (1928), Perjuangan kemerdekaan (1945).\n\n🔑 17 Agustus 1945 = Proklamasi Kemerdekaan RI',tag:'Bab 5'},
+]},
+ppkn:{name:'PPKn',icon:'🇮🇩',color:'#8b5cf6',color2:'#0284c7',rgb:'139,92,246',materi:[
+  {title:'Nilai-nilai Pancasila',body:'Pancasila sebagai dasar negara dan pandangan hidup bangsa. Setiap sila memiliki nilai:\n\n1. Ketuhanan → toleransi beragama, menjalankan ibadah\n2. Kemanusiaan → menghormati HAM, tidak diskriminatif\n3. Persatuan → cinta tanah air, gotong royong\n4. Kerakyatan → musyawarah, demokrasi\n5. Keadilan → merata, tidak ada penindasan\n\n🔑 Pancasila bukan agama, tapi menjamin kebebasan beragama',tag:'Bab 1'},
+  {title:'Konstitusi & UUD 1945',body:'UUD 1945 adalah hukum dasar tertulis, norma hukum tertinggi di Indonesia. Sistematika: Pembukaan (4 alinea) + Batang Tubuh (37 pasal, 3 aturan peralihan, 2 aturan tambahan).\n\nAmandemen UUD 1945 (1999-2002): presiden max 2 periode, DPD, MK, KY.\n\nPembukaan UUD 1945 mengandung: tujuan negara, dasar negara (Pancasila), pernyataan kemerdekaan.\n\n🔑 Kedaulatan ada di tangan rakyat (Pasal 1 Ayat 2)',tag:'Bab 2'},
+  {title:'HAM & Kewarganegaraan',body:'HAM adalah hak dasar yang melekat sejak lahir, universal, tidak dapat dicabut. UU HAM No. 39/1999 dan UU Pengadilan HAM No. 26/2000.\n\nHak warga negara: pendidikan, pekerjaan, kesehatan, keamanan, berpendapat.\nKewajiban: membayar pajak, membela negara, menjunjung hukum.\n\nPelanggaran HAM: genosida, kejahatan kemanusiaan, penyiksaan, perbudakan.\n\n🔑 HAM dijamin Pasal 28A-J UUD 1945',tag:'Bab 3'},
+  {title:'Demokrasi di Indonesia',body:'Demokrasi = pemerintahan dari, oleh, dan untuk rakyat (Abraham Lincoln). Prinsip: kedaulatan rakyat, persamaan di depan hukum, kebebasan berpendapat.\n\nSejarah demokrasi Indonesia:\n• Demokrasi Parlementer (1950-1959)\n• Demokrasi Terpimpin (1959-1966)\n• Demokrasi Pancasila Orde Baru (1966-1998)\n• Demokrasi Reformasi (1998-sekarang)\n\n🔑 Pemilu = wujud nyata demokrasi langsung',tag:'Bab 4'},
+  {title:'Integrasi Nasional',body:'Integrasi nasional = penyatuan bangsa yang berbeda SARA menjadi satu kesatuan. Faktor pendorong: Sumpah Pemuda, bahasa Indonesia, lagu kebangsaan, bendera merah putih.\n\nAncaman: separatisme, konflik SARA, radikalisme, hoaks.\n\nBineka Tunggal Ika: berbeda-beda tetapi tetap satu jua.\n\n🔑 Semboyan NKRI: wawasan nusantara, ketahanan nasional',tag:'Bab 5'},
+]},
+pancasila:{name:'Pend. Pancasila',icon:'🦅',color:'#ec4899',color2:'#db2777',rgb:'236,72,153',materi:[
+  {title:'Lahirnya Pancasila',body:'Pancasila dirumuskan pada sidang BPUPKI (28 Mei-1 Juni 1945). Tokoh perumus: Moh. Yamin, Soepomo, Soekarno.\n\nPidato Soekarno 1 Juni 1945 mencetuskan "Pancasila". Piagam Jakarta (22 Juni 1945) = draft awal Pembukaan UUD.\n\nPada 18 Agustus 1945, PPKI mengubah sila pertama: "Dengan kewajiban menjalankan syariat Islam..." diganti "Yang Maha Esa".\n\n🔑 1 Juni = Hari Lahir Pancasila (hari libur nasional)',tag:'Bab 1'},
+  {title:'Pancasila sebagai Dasar Negara',body:'Pancasila berkedudukan sebagai:\n• Dasar negara (norma dasar hukum)\n• Pandangan hidup bangsa (way of life)\n• Ideologi nasional (cita-cita bersama)\n• Kepribadian bangsa\n• Sumber dari segala sumber hukum\n\nHubungan Pancasila-UUD 1945: Pancasila ada di alinea 4 Pembukaan UUD. Pancasila tidak boleh diubah.\n\n🔑 Pancasila ≠ dapat diganti dengan ideologi lain',tag:'Bab 2'},
+  {title:'Nilai Pancasila dalam Kehidupan',body:'Implementasi Pancasila:\n\nSila 1 → hormati teman beda agama, tidak memaksakan keyakinan\nSila 2 → bantu orang kesusahan, jujur, tidak curang\nSila 3 → cinta produk lokal, kegiatan gotong royong\nSila 4 → musyawarah kelas, tidak main hakim sendiri\nSila 5 → berbagi ilmu, tidak pilih kasih\n\n🔑 Pancasila harus diamalkan dalam tindakan nyata sehari-hari',tag:'Bab 3'},
+  {title:'Tantangan Ideologi Bangsa',body:'Tantangan Pancasila di era modern:\n• Radikalisme & ekstremisme → ancaman dari dalam\n• Liberalisme ekstrem → individualisme berlebihan\n• Komunisme → bertentangan dengan sila 1\n• Hoaks & ujaran kebencian → memecah persatuan\n\nPeran generasi muda: menolak radikalisme, menggunakan media sosial secara bijak, aktif berorganisasi, menghargai perbedaan.\n\n🔑 Literasi digital = pertahanan ideologi zaman now',tag:'Bab 4'},
+]},
+bind:{name:'Bahasa Indonesia',icon:'📖',color:'#0284c7',color2:'#0369a1',rgb:'2,132,199',materi:[
+  {title:'Teks Laporan Hasil Observasi',body:'Teks LHO adalah teks yang menyajikan informasi tentang suatu objek/fenomena berdasarkan pengamatan langsung. Bersifat objektif, ilmiah, faktual.\n\nStruktur: Pernyataan umum → Deskripsi bagian → Deskripsi manfaat\n\nCiri kebahasaan: kata benda umum (definisi), verba relasional (adalah, merupakan), kalimat simpleks & kompleks.\n\n🔑 LHO ≠ narasi → tidak ada unsur cerita/fiksi',tag:'Bab 1'},
+  {title:'Teks Eksposisi',body:'Teks eksposisi adalah teks yang bertujuan memaparkan informasi/gagasan secara singkat dan jelas. Bertujuan menambah pengetahuan pembaca.\n\nStruktur: Tesis → Argumentasi → Penegasan ulang\n\nJenis: definisi, proses, ilustrasi, klasifikasi, perbandingan, pertentangan.\n\nCiri: menggunakan kata-kata persuasif (sebaiknya, diharapkan), konjungsi kausal (karena, sehingga), data & fakta.\n\n🔑 Tesis = pendapat utama penulis',tag:'Bab 2'},
+  {title:'Teks Anekdot',body:'Teks anekdot adalah cerita singkat yang menarik dan lucu, berdasarkan kejadian nyata/imajinasi, bertujuan mengkritik secara implisit.\n\nStruktur: Abstraksi → Orientasi → Krisis → Reaksi → Koda\n\nCiri: mengandung sindiran/kritik sosial, menggunakan kata kias, bersifat humoris, tokoh terkenal/fiktif.\n\nUnsur humor: ironi, sarkasme, parodi.\n\n🔑 Kritik dalam anekdot bersifat tersirat (tidak langsung)',tag:'Bab 3'},
+  {title:'Teks Negosiasi',body:'Teks negosiasi adalah teks yang memuat proses tawar-menawar untuk mencapai kesepakatan. Terjadi ketika ada perbedaan kepentingan.\n\nStruktur: Orientasi → Pengajuan → Penawaran → Persetujuan\n\nCiri: menggunakan kalimat persuasif, modalitas (mungkin, bisa, sebaiknya), kalimat deklaratif & interogatif.\n\nContoh: negosiasi harga, negosiasi kerja sama, negosiasi antar negara.\n\n🔑 Negosiasi berhasil = win-win solution (kedua pihak puas)',tag:'Bab 4'},
+  {title:'Ejaan & Tata Bahasa',body:'PUEBI (Pedoman Umum Ejaan Bahasa Indonesia):\n• Huruf kapital: awal kalimat, nama orang, nama tempat, jabatan resmi\n• Tanda baca: titik (.), koma (,), titik dua (:), tanda tanya (?), seru (!)\n\nKata baku vs tidak baku: aktif/aktip, analisis/analisa, sistem/sistim\n\nKalimat efektif: hemat kata, tidak ambigu, sesuai EYD, logis.\n\n🔑 Paragraf = kumpulan kalimat dengan satu ide pokok',tag:'Bab 5'},
+]},
+bing:{name:'Bahasa Inggris',icon:'🌐',color:'#0891b2',color2:'#0e7490',rgb:'8,145,178',materi:[
+  {title:'Tenses (16 Tenses)',body:'Tenses terpenting untuk kelas X:\n\n✅ Simple Present: S + V1(+s/es)\nContoh: She reads every day.\n\n✅ Present Continuous: S + is/am/are + V-ing\nContoh: I am studying now.\n\n✅ Simple Past: S + V2\nContoh: He went to school yesterday.\n\n✅ Future (will): S + will + V1\nContoh: They will come tomorrow.\n\n🔑 Signal words: now, every day, yesterday, tomorrow',tag:'Bab 1'},
+  {title:'Descriptive Text',body:'Descriptive text describes a specific person, place, animal, or thing.\n\nStructure:\n• Identification: who/what is described\n• Description: features, characteristics\n\nLanguage features:\n• Specific nouns: Borobudur, my cat\n• Simple present tense\n• Adjectives: beautiful, tall, magnificent\n• Sensory details (sight, sound, smell)\n\nExample: "Borobudur is a 9th-century Mahayana Buddhist temple. It has 2,672 relief panels and 72 stupas."',tag:'Bab 2'},
+  {title:'Procedure Text',body:'Procedure text tells how to do or make something. Purpose: to instruct.\n\nStructure:\n• Goal: what to make/do\n• Materials/Tools: ingredients needed\n• Steps: numbered instructions\n\nLanguage features:\n• Imperative sentences: Boil, Mix, Cut\n• Temporal conjunctions: First, Then, Next, Finally\n• Action verbs\n\nExample: How to make instant noodle\n1. Boil 400ml water. 2. Put noodles in. 3. Add seasoning.',tag:'Bab 3'},
+  {title:'Narrative Text',body:'Narrative text tells a story, usually fictional, with a problem and solution.\n\nStructure:\n• Orientation: who, when, where\n• Complication: the conflict/problem\n• Resolution: how it was solved\n• Reorientation: closing/moral\n\nLanguage features:\n• Past tense\n• Time connectives: once upon a time, then, suddenly\n• Dialogue\n\nGenres: fairy tale, fable, legend, myth, horror.\n\n🔑 Moral value = pesan moral cerita',tag:'Bab 4'},
+  {title:'Expressing Feelings & Opinions',body:'Useful expressions:\n\nOpinion:\n• I think / I believe / In my opinion...\n• As far as I know...\n• I agree / I disagree because...\n\nFeelings:\n• I feel happy/sad/worried/excited\n• Im really pleased that...\n• Im concerned about...\n\nAsking opinions:\n• What do you think about...?\n• How do you feel about...?\n• Do you agree that...?\n\n🔑 Gunakan these phrases saat diskusi atau presentasi',tag:'Bab 5'},
+]},
+senbud:{name:'Seni Budaya',icon:'🎨',color:'#f97316',color2:'#ea580c',rgb:'249,115,22',materi:[
+  {title:'Apresiasi Seni Rupa',body:'Seni rupa adalah cabang seni yang mengekspresikan konsep dengan menciptakan karya yang dapat dilihat dan dirasakan. Unsur-unsur: titik, garis, bidang, warna, tekstur, gelap-terang, ruang.\n\nPrinsip: keseimbangan, proporsi, irama, harmoni, kesatuan, dominasi.\n\nJenis: 2D (lukisan, gambar) dan 3D (patung, keramik).\n\n🔑 Apresiasi = mengenal, memahami, menghargai karya seni',tag:'Bab 1'},
+  {title:'Seni Rupa Nusantara',body:'Kekayaan seni rupa Indonesia:\n• Batik: Jawa (Yogya, Solo), motif Parang, Kawung, Megamendung\n• Tenun: NTT, NTB, Kalimantan, Sulawesi\n• Ukir: Jepara (kayu), Bali (batu)\n• Anyaman: bambu, rotan, pandan\n• Wayang: kulit, golek, kertas\n\nBatik diakui UNESCO sebagai Warisan Kemanusiaan (2009).\n\n🔑 Seni rupa = cermin identitas budaya daerah',tag:'Bab 2'},
+  {title:'Seni Musik',body:'Musik adalah pengorganisasian bunyi yang harmonis dan memiliki keindahan. Unsur: melodi, harmoni, ritme, tempo, dinamik, timbre.\n\nAlat musik tradisional: gamelan, angklung, kolintang, sasando, tifa, rebab, gendang.\n\nTangga nada:\n• Diatonis (7 nada): do re mi fa sol la si\n• Pentatonis (5 nada): tradisional Asia\n\nMusik daerah: kethoprak, keroncong, campursari, dangdut.\n\n🔑 Angklung dari Jawa Barat = Warisan UNESCO 2010',tag:'Bab 3'},
+  {title:'Seni Tari',body:'Tari adalah gerak tubuh yang ritmis, berirama, dan ekspresif sebagai ungkapan jiwa. Unsur: gerak, irama, ekspresi, tata rias, tata busana, properti.\n\nTari tradisional:\n• Jawa: Gambyong, Bedhaya, Srimpi\n• Bali: Kecak, Pendet, Legong\n• Sunda: Jaipong, Merak\n• Sumatra: Saman, Piring\n• Papua: Yospan\n\nTari Saman (Aceh) diakui UNESCO.\n\n🔑 Gerak maknawi = gerak yang punya arti (memanah, menyembah)',tag:'Bab 4'},
+  {title:'Seni Teater',body:'Teater adalah seni pertunjukan yang menggabungkan gerak, suara, dan visual di atas panggung. Unsur: naskah, sutradara, aktor, artistik (tata panggung, cahaya, suara).\n\nJenis teater tradisional: wayang, ludruk, lenong, mamanda, randai, ketoprak.\nTeater modern: drama realisme, musikal, opera.\n\nProses pementasan: ide → naskah → casting → latihan → pementasan.\n\n🔑 Blocking = posisi dan perpindahan aktor di panggung',tag:'Bab 5'},
+]},
+};
+
+var activeMapel=null;
+
+window.openMapel=function(id){
+  if(!MAPEL_DATA[id])return;
+  /* tutup yang lain */
+  document.querySelectorAll('.materi-panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.mapel-card').forEach(function(c){c.classList.remove('active');});
+
+  if(activeMapel===id){activeMapel=null;return;}
+  activeMapel=id;
+
+  var m=MAPEL_DATA[id];
+  document.getElementById('mc-'+id).classList.add('active');
+
+  var container=document.getElementById('materiPanels');
+  /* bikin panel kalau belum ada */
+  var panelId='mp-'+id;
+  var existPanel=document.getElementById(panelId);
+  if(!existPanel){
+    var panel=document.createElement('div');
+    panel.id=panelId;
+    panel.className='materi-panel';
+    panel.style.setProperty('--mc',m.color);
+    panel.style.setProperty('--mc2',m.color2);
+    panel.style.setProperty('--mc-rgb',m.rgb);
+    panel.innerHTML='<div class="materi-back" onclick="closeMapel()">← Kembali ke daftar pelajaran</div>'+
+      '<div class="materi-panel-header"><div class="materi-panel-icon">'+m.icon+'</div><div class="materi-panel-name">'+m.name+'</div><div class="materi-panel-desc">Materi Kelas X • '+m.materi.length+' Bab</div></div>'+
+      '<div class="materi-list">'+m.materi.map(function(item,i){return '<div class="materi-item" onclick="toggleMateri(this)"><div class="materi-item-top"><div class="materi-num">'+('0'+(i+1)).slice(-2)+'</div><div class="materi-item-title">'+item.title+'</div><span class="materi-item-arrow">›</span></div><div class="materi-item-preview">'+item.body.replace(/\n/g,'<br>')+'<br><span class="materi-tag">'+item.tag+'</span></div></div>';}).join('')+'</div>';
+    container.appendChild(panel);
+  }
+
+  document.getElementById(panelId).classList.add('active');
+
+  /* scroll ke panel */
+  setTimeout(function(){
+    document.getElementById(panelId).scrollIntoView({behavior:'smooth',block:'start'});
+    /* sembunyikan grid daftar mapel */
+    document.getElementById('mapelSection').style.display='none';
+  },80);
+};
+
+window.closeMapel=function(){
+  document.querySelectorAll('.materi-panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.mapel-card').forEach(function(c){c.classList.remove('active');});
+  document.getElementById('mapelSection').style.display='block';
+  activeMapel=null;
+};
+
+window.toggleMateri=function(el){
+  var isOpen=el.classList.contains('open');
+  document.querySelectorAll('.materi-item.open').forEach(function(it){it.classList.remove('open');});
+  if(!isOpen)el.classList.add('open');
+};
+
+window.filterMapel=function(q){
+  q=q.toLowerCase().trim();
+  if(!q){document.querySelectorAll('.mapel-card').forEach(function(c){c.style.display='';});document.querySelectorAll('.mapel-section-title,.mapel-grid').forEach(function(el){el.style.display='';});return;}
+  Object.keys(MAPEL_DATA).forEach(function(id){
+    var m=MAPEL_DATA[id];
+    var match=m.name.toLowerCase().includes(q);
+    var card=document.getElementById('mc-'+id);
+    if(card)card.style.display=match?'':'none';
+  });
+};
+
+
+
+/* ===== BELAJAR MODE TOGGLE ===== */
+window.switchBmode=function(mode){
+  document.getElementById('bmodeMateri').classList.toggle('active',mode==='materi');
+  document.getElementById('bmodeQuiz').classList.toggle('active',mode==='quiz');
+  document.getElementById('bmMateri').style.display=mode==='materi'?'block':'none';
+  document.getElementById('bmQuiz').classList.toggle('active',mode==='quiz');
+};
+/* init - materi default */
+document.getElementById('bmQuiz').classList.remove('active');
+
+/* ===== QUIZ ENGINE ===== */
+var QUIZ_DATA={
+ipa:[
+  {q:'Urutan metode ilmiah yang benar adalah...',o:['Hipotesis→Observasi→Eksperimen→Kesimpulan','Observasi→Hipotesis→Eksperimen→Analisis→Kesimpulan','Eksperimen→Observasi→Hipotesis→Kesimpulan','Kesimpulan→Analisis→Eksperimen→Hipotesis'],a:1,e:'Metode ilmiah dimulai dari observasi, kemudian membuat hipotesis, lalu eksperimen, analisis data, dan kesimpulan.'},
+  {q:'Perubahan es mencair menjadi air termasuk perubahan...',o:['Kimia','Fisika','Biologi','Alam'],a:1,e:'Perubahan fisika tidak menghasilkan zat baru. Es dan air sama-sama H₂O, hanya wujudnya berubah.'},
+  {q:'Hukum Kekekalan Energi menyatakan bahwa energi...',o:['Dapat diciptakan dari bahan kimia','Dapat dimusnahkan dengan reaksi tertentu','Tidak dapat diciptakan atau dimusnahkan, hanya berubah bentuk','Selalu berkurang setiap kali digunakan'],a:2,e:'Energi tidak dapat diciptakan atau dimusnahkan — hanya dapat diubah dari satu bentuk ke bentuk lain.'},
+  {q:'Ciri-ciri makhluk hidup yang membedakannya dari benda mati adalah...',o:['Memiliki warna tertentu','Bernapas, bergerak, dan berkembang biak','Memiliki massa dan menempati ruang','Tidak bergerak sama sekali'],a:1,e:'Ciri makhluk hidup: bernapas, bergerak, tumbuh, berkembang biak, peka rangsang, memerlukan nutrisi, dan mengeluarkan zat sisa.'},
+  {q:'Rumus energi kinetik adalah...',o:['Ek = mgh','Ek = ½mv²','Ek = mv','Ek = F×d'],a:1,e:'Energi kinetik = ½ × massa × kecepatan². Ep (potensial) = mgh.'},
+  {q:'Rantai makanan yang benar adalah...',o:['Konsumen→Produsen→Dekomposer','Dekomposer→Produsen→Konsumen','Produsen→Konsumen I→Konsumen II→Dekomposer','Konsumen II→Konsumen I→Produsen'],a:2,e:'Alur energi: Produsen (tumbuhan) → Konsumen I (herbivora) → Konsumen II (karnivora) → Dekomposer.'},
+  {q:'Jarak Bumi ke Matahari adalah sekitar...',o:['15 juta km','150 juta km (1 AU)','1.500 juta km','1,5 juta km'],a:1,e:'Jarak Bumi-Matahari ≈ 150 juta km, disebut 1 AU (Astronomical Unit).'},
+  {q:'Struktur bumi dari luar ke dalam adalah...',o:['Kerak→Mantel→Inti Luar→Inti Dalam','Inti Dalam→Inti Luar→Mantel→Kerak','Mantel→Kerak→Inti→Atmosfer','Inti→Kerak→Mantel→Litosfer'],a:0,e:'Dari luar ke dalam: Kerak → Mantel → Inti luar (cair Fe-Ni) → Inti dalam (padat Fe-Ni).'},
+  {q:'Wujud zat yang memiliki partikel rapat dan teratur adalah...',o:['Gas','Cair','Padat','Plasma'],a:2,e:'Zat padat: partikel rapat & teratur. Cair: rapat tapi tidak teratur. Gas: partikel berjauhan.'},
+  {q:'Planet ke-3 dari Matahari dalam tata surya adalah...',o:['Mars','Venus','Bumi','Merkurius'],a:2,e:'Urutan: Merkurius, Venus, Bumi, Mars, Jupiter, Saturnus, Uranus, Neptunus.'},
+  {q:'Ekosistem terdiri dari komponen biotik dan abiotik. Yang termasuk komponen abiotik adalah...',o:['Hewan','Tumbuhan','Air dan suhu','Jamur'],a:2,e:'Abiotik = benda tidak hidup: suhu, cahaya, air, tanah, udara. Biotik = organisme hidup.'},
+  {q:'Pembakaran kayu menghasilkan abu dan asap. Ini adalah contoh perubahan...',o:['Fisika','Wujud','Kimia','Mekanik'],a:2,e:'Perubahan kimia menghasilkan zat baru. Abu dan asap adalah zat berbeda dari kayu.'},
+  {q:'Variabel yang sengaja diubah dalam eksperimen disebut...',o:['Variabel terikat','Variabel bebas','Variabel kontrol','Variabel tetap'],a:1,e:'Variabel bebas = yang diubah peneliti. Variabel terikat = yang diamati/diukur. Kontrol = yang dijaga tetap.'},
+  {q:'Piramida energi dalam ekosistem menunjukkan bahwa energi...',o:['Bertambah ke tingkat trofik lebih tinggi','Berkurang ke tingkat trofik lebih tinggi','Sama di semua tingkat trofik','Tidak berhubungan dengan tingkat trofik'],a:1,e:'Setiap tingkat trofik, energi berkurang ±90% karena digunakan untuk metabolisme organisme itu sendiri.'},
+  {q:'Hipotesis dalam metode ilmiah adalah...',o:['Hasil akhir eksperimen','Dugaan sementara yang perlu diuji','Fakta yang sudah terbukti','Pengamatan pertama'],a:1,e:'Hipotesis adalah jawaban/dugaan sementara yang dibuat sebelum eksperimen dan harus diuji.'},
+],
+mat:[
+  {q:'Sifat eksponen: a^m × a^n = ?',o:['a^(m-n)','a^(m×n)','a^(m+n)','a^(m÷n)'],a:2,e:'Perkalian basis sama → eksponen dijumlahkan: aᵐ × aⁿ = aᵐ⁺ⁿ.'},
+  {q:'Nilai dari 2⁰ adalah...',o:['0','2','1','Tidak terdefinisi'],a:2,e:'Setiap bilangan berpangkat 0 (kecuali 0) = 1. a⁰ = 1.'},
+  {q:'Jika D = b²-4ac > 0 pada persamaan kuadrat, maka...',o:['Tidak ada akar real','Dua akar real yang sama','Dua akar real yang berbeda','Satu akar imajiner'],a:2,e:'D > 0 → dua akar real berbeda. D = 0 → dua akar sama. D < 0 → tidak ada akar real.'},
+  {q:'Titik puncak fungsi kuadrat f(x) = ax² + bx + c adalah...',o:['(-b/a, -D/4a)','(-b/2a, -D/4a)','(b/2a, D/4a)','(b/a, D/a)'],a:1,e:'Titik puncak: x = -b/2a, y = -D/4a di mana D = b²-4ac.'},
+  {q:'Nilai sin 45° adalah...',o:['½','½√3','½√2','1'],a:2,e:'sin 45° = cos 45° = ½√2 ≈ 0,707. Sin 30° = ½, sin 60° = ½√3.'},
+  {q:'Identitas trigonometri dasar adalah...',o:['sin²α - cos²α = 1','sin²α + cos²α = 1','sin α × cos α = 1','tan α = sin α × cos α'],a:1,e:'Identitas Pythagoras: sin²α + cos²α = 1. Berlaku untuk semua nilai α.'},
+  {q:'Median dari data: 3, 5, 7, 9, 11 adalah...',o:['5','7','9','6'],a:1,e:'Data sudah terurut, jumlah data 5 (ganjil). Median = nilai tengah = data ke-3 = 7.'},
+  {q:'Mean dari data 4, 6, 8, 10, 12 adalah...',o:['8','9','7','10'],a:0,e:'Mean = (4+6+8+10+12)/5 = 40/5 = 8.'},
+  {q:'Bentuk umum persamaan kuadrat adalah...',o:['ax + b = 0','ax² + bx + c = 0 (a≠0)','ax³ + bx² + c = 0','a/x + b = 0'],a:1,e:'Persamaan kuadrat: ax² + bx + c = 0 dengan a ≠ 0. Jika a = 0, menjadi persamaan linear.'},
+  {q:'Diketahui sistem: 2x + y = 10 dan x - y = 2. Nilai x adalah...',o:['3','4','5','6'],a:1,e:'Eliminasi: 3x = 12 → x = 4. Substitusi: y = 10 - 2(4) = 2.'},
+  {q:'log(a×b) = ?',o:['log a × log b','log a - log b','log a + log b','log a ÷ log b'],a:2,e:'Sifat logaritma: log(ab) = log a + log b. log(a/b) = log a - log b.'},
+  {q:'Nilai cos 30° adalah...',o:['½','½√2','½√3','1'],a:2,e:'cos 30° = ½√3 ≈ 0,866. sin 30° = ½. tan 30° = 1/√3.'},
+  {q:'Jika a⁻² = 1/9, maka nilai a adalah...',o:['3','9','⅓','±3'],a:3,e:'a⁻² = 1/a² = 1/9 → a² = 9 → a = ±3.'},
+  {q:'Rumus ABC untuk persamaan kuadrat adalah...',o:['x = -b ± √(b²-4ac)','x = (-b ± √(b²-4ac)) / 2a','x = (b ± √(b²+4ac)) / 2a','x = -b/2a'],a:1,e:'Rumus ABC: x = [-b ± √(b²-4ac)] / 2a. Ini memberikan kedua akar persamaan kuadrat.'},
+  {q:'tan α = ?',o:['sin α × cos α','sin α / cos α','cos α / sin α','1 / sin α'],a:1,e:'tan α = sin α / cos α. Ini adalah definisi dasar tangen dalam trigonometri.'},
+],
+ips:[
+  {q:'Syarat terjadinya interaksi sosial adalah...',o:['Kontak sosial saja','Komunikasi saja','Kontak sosial dan komunikasi','Pertukaran barang'],a:2,e:'Interaksi sosial memerlukan dua syarat: (1) kontak sosial dan (2) komunikasi antar pihak.'},
+  {q:'Hukum permintaan menyatakan bahwa...',o:['Harga naik → permintaan naik','Harga naik → permintaan turun','Harga turun → permintaan turun','Harga tidak mempengaruhi permintaan'],a:1,e:'Hukum permintaan: harga dan permintaan berbanding terbalik. Harga naik → permintaan turun, ceteris paribus.'},
+  {q:'Indonesia terletak di antara dua samudra yaitu...',o:['Atlantik dan Pasifik','Hindia dan Arktik','Hindia dan Pasifik','Antartika dan Pasifik'],a:2,e:'Indonesia diapit Samudra Hindia (barat-selatan) dan Samudra Pasifik (timur-utara).'},
+  {q:'Peradaban Mesopotamia berkembang di lembah sungai...',o:['Nil','Indus','Tigris dan Efrat','Huang He'],a:2,e:'Mesopotamia (artinya "tanah di antara dua sungai") berkembang di lembah Sungai Tigris dan Efrat (Irak sekarang).'},
+  {q:'Sistem ekonomi di mana negara mengatur seluruh kegiatan ekonomi disebut...',o:['Sistem pasar (liberal)','Sistem tradisional','Sistem komando (terpusat)','Sistem campuran'],a:2,e:'Sistem komando/terpusat: negara menentukan apa yang diproduksi, berapa, dan untuk siapa. Contoh: Korea Utara.'},
+  {q:'Kelangkaan dalam ekonomi mendorong terjadinya...',o:['Kemakmuran otomatis','Pemborosan sumber daya','Pilihan dan opportunity cost','Produksi tanpa batas'],a:2,e:'Kelangkaan → manusia harus membuat pilihan → setiap pilihan ada biaya peluang (opportunity cost) yang dikorbankan.'},
+  {q:'Indonesia masuk dalam "Ring of Fire" yang berarti...',o:['Negara penghasil minyak terbesar','Wilayah rawan gempa bumi dan gunung berapi','Negara dengan temperatur tertinggi','Kawasan penghasil batu bara'],a:1,e:'Ring of Fire (Cincin Api Pasifik) adalah jalur vulkanik dan seismik paling aktif di dunia. Indonesia sangat rawan gempa dan letusan gunung berapi.'},
+  {q:'Lembaga sosial yang mengatur kebutuhan regenerasi manusia adalah...',o:['Lembaga ekonomi','Lembaga keluarga','Lembaga pendidikan','Lembaga politik'],a:1,e:'Lembaga keluarga mengatur pernikahan, keturunan, dan sosialisasi primer. Ini adalah lembaga sosial paling dasar.'},
+  {q:'Kebutuhan primer manusia meliputi...',o:['Kendaraan, TV, dan HP','Sandang, pangan, dan papan','Pendidikan, hiburan, dan wisata','Tabungan, investasi, dan asuransi'],a:1,e:'Kebutuhan primer = kebutuhan pokok untuk bertahan hidup: sandang (pakaian), pangan (makanan), papan (tempat tinggal).'},
+  {q:'Sumpah Pemuda diikrarkan pada tahun...',o:['1908','1945','1928','1918'],a:2,e:'Sumpah Pemuda diikrarkan pada 28 Oktober 1928 dalam Kongres Pemuda II di Jakarta.'},
+  {q:'Sosialisasi primer terjadi di...',o:['Sekolah','Keluarga','Masyarakat','Tempat kerja'],a:1,e:'Sosialisasi primer = sosialisasi pertama dalam keluarga sejak bayi. Sosialisasi sekunder = di sekolah, teman, masyarakat.'},
+  {q:'Interaksi yang bersifat kerja sama disebut...',o:['Kompetitif','Konfliktif','Kooperatif','Akomodatif'],a:2,e:'Interaksi sosial: kooperatif (kerja sama), kompetitif (persaingan/kompetisi), konfliktif (konflik/pertentangan).'},
+  {q:'Julukan Mesir Kuno sebagai "Hadiah Sungai Nil" karena...',o:['Nil adalah sungai terpanjang di dunia','Banjir Nil menyuburkan tanah pertanian Mesir','Nil digunakan untuk jalur perdagangan utama','Piramida dibangun di tepi Sungai Nil'],a:1,e:'Banjir tahunan Sungai Nil membawa lumpur subur (silt) yang menyuburkan tanah pertanian Mesir. Tanpa Nil, Mesir adalah gurun.'},
+  {q:'Masalah sosial kemiskinan dapat mendorong terjadinya...',o:['Kemakmuran merata','Kesenjangan sosial dan kriminalitas','Pertumbuhan ekonomi positif','Peningkatan pendidikan'],a:1,e:'Kemiskinan → kesenjangan sosial → frustrasi → kriminalitas. Ini adalah rantai kausal masalah sosial yang umum.'},
+  {q:'Jumlah pulau Indonesia diperkirakan lebih dari...',o:['1.700 pulau','5.000 pulau','17.000 pulau','100.000 pulau'],a:2,e:'Indonesia memiliki lebih dari 17.000 pulau, menjadikannya negara kepulauan terbesar di dunia.'},
+],
+sejarah:[
+  {q:'Tiga unsur utama sejarah adalah...',o:['Manusia, ruang, dan waktu','Dokumen, artefak, dan saksi','Kronologi, kronik, dan annals','Politik, ekonomi, dan budaya'],a:0,e:'Sejarah selalu melibatkan: manusia (siapa), ruang/tempat (di mana), dan waktu (kapan).'},
+  {q:'Kerajaan Hindu tertua di Indonesia adalah...',o:['Majapahit','Sriwijaya','Kutai','Tarumanegara'],a:2,e:'Kutai di Kalimantan Timur (abad 4 M) adalah kerajaan Hindu tertua di Indonesia berdasarkan prasasti Yupa.'},
+  {q:'Proklamasi Kemerdekaan Indonesia dilaksanakan pada...',o:['17 Agustus 1945','17 Agustus 1944','18 Agustus 1945','1 Juni 1945'],a:0,e:'Proklamasi Kemerdekaan Indonesia dibacakan oleh Soekarno-Hatta pada 17 Agustus 1945 di Jakarta.'},
+  {q:'Sumpah Palapa diucapkan oleh...',o:['Raden Wijaya','Gajah Mada','Hayam Wuruk','Ken Arok'],a:1,e:'Gajah Mada mengucapkan Sumpah Palapa: tidak akan menikmati buah palapa sebelum menyatukan Nusantara di bawah Majapahit.'},
+  {q:'VOC (Vereenigde Oostindische Compagnie) didirikan pada tahun...',o:['1511','1602','1619','1799'],a:1,e:'VOC didirikan tahun 1602 oleh Belanda sebagai perusahaan dagang. Dibubarkan tahun 1799 karena bangkrut.'},
+  {q:'Teori yang menyatakan Islam masuk ke Indonesia dibawa oleh pedagang dari India adalah...',o:['Teori Arab','Teori Persia','Teori Gujarat','Teori Tiongkok'],a:2,e:'Teori Gujarat (Snouck Hurgronje): Islam dibawa pedagang dari Gujarat, India. Teori Arab: langsung dari Arab. Teori Persia: dari Iran.'},
+  {q:'Budi Utomo didirikan pada tahun...',o:['1908','1928','1945','1900'],a:0,e:'Budi Utomo didirikan 20 Mei 1908 oleh dr. Soetomo dan mahasiswa STOVIA. Tanggal ini diperingati sebagai Hari Kebangkitan Nasional.'},
+  {q:'Sistem tanam paksa (cultuurstelsel) diterapkan oleh...',o:['Raffles','Daendels','Van den Bosch','Coen'],a:2,e:'Sistem tanam paksa diterapkan Gubernur Jenderal Van den Bosch (1830) yang memaksa rakyat menanam komoditas ekspor.'},
+  {q:'Masa sebelum manusia mengenal tulisan disebut...',o:['Sejarah kuno','Praaksara (prasejarah)','Abad pertengahan','Zaman modern'],a:1,e:'Praaksara = sebelum mengenal tulisan (pra = sebelum, aksara = tulisan). Masa ini diketahui melalui artefak dan fosil.'},
+  {q:'Wali Songo menyebarkan Islam di Jawa dengan cara...',o:['Peperangan dan paksaan','Cara damai melalui budaya, seni, dan wayang','Perdagangan senjata','Menghancurkan kerajaan Hindu'],a:1,e:'Wali Songo (9 wali) menyebarkan Islam secara damai melalui pendekatan budaya: wayang, gamelan, dan kearifan lokal.'},
+  {q:'Kerajaan Islam tertua di Indonesia adalah...',o:['Demak','Mataram','Banten','Samudra Pasai'],a:3,e:'Samudra Pasai di Aceh (abad 13 M) adalah kerajaan Islam tertua di Indonesia sekaligus Asia Tenggara.'},
+  {q:'Perlawanan Pangeran Diponegoro terjadi pada tahun...',o:['1800-1810','1825-1830','1850-1860','1900-1910'],a:1,e:'Perang Diponegoro (Perang Jawa) berlangsung 1825-1830, salah satu perang paling mematikan dalam sejarah kolonial Belanda.'},
+  {q:'Sumber sejarah yang berasal dari pelaku atau saksi langsung disebut...',o:['Sumber sekunder','Sumber tersier','Sumber primer','Sumber interpretatif'],a:2,e:'Sumber primer = sumber langsung dari pelaku/saksi (dokumen asli, foto, rekaman). Sumber sekunder = berdasarkan sumber primer.'},
+  {q:'Tulisan hieroglif adalah sistem tulisan dari peradaban...',o:['Mesopotamia','India kuno','Mesir Kuno','Cina kuno'],a:2,e:'Hieroglif adalah sistem tulisan gambar dari Mesir Kuno. Mesopotamia menggunakan tulisan cuneiform.'},
+  {q:'Manusia purba jenis Homo pertama kali ditemukan di...',o:['Afrika','Asia','Amerika','Eropa'],a:0,e:'Homo sapiens (manusia modern) berasal dari Afrika. Di Indonesia ditemukan Pithecanthropus (Jawa Man) yang lebih primitif.'},
+],
+ppkn:[
+  {q:'Kedaulatan negara Indonesia ada di tangan...',o:['Presiden','MPR','Rakyat','DPR'],a:2,e:'Pasal 1 Ayat 2 UUD 1945: "Kedaulatan berada di tangan rakyat dan dilaksanakan menurut Undang-Undang Dasar."'},
+  {q:'UUD 1945 diamandemen sebanyak berapa kali?',o:['2 kali','3 kali','4 kali','5 kali'],a:2,e:'UUD 1945 diamandemen 4 kali: 1999, 2000, 2001, dan 2002. Perubahan besar antara lain: presiden max 2 periode, lahirnya DPD, MK, dan KY.'},
+  {q:'Hak Asasi Manusia diatur dalam UUD 1945 pada...',o:['Pasal 28A-28J','Pasal 30-35','Pasal 1-10','Pasal 20-27'],a:0,e:'Pasal 28A-28J UUD 1945 mengatur HAM secara komprehensif setelah amandemen kedua tahun 2000.'},
+  {q:'"Pemerintahan dari, oleh, dan untuk rakyat" adalah definisi demokrasi menurut...',o:['John Locke','Montesquieu','Abraham Lincoln','Jean-Jacques Rousseau'],a:2,e:'Definisi demokrasi oleh Abraham Lincoln dalam pidato Gettysburg (1863): "government of the people, by the people, for the people."'},
+  {q:'Demokrasi Terpimpin di Indonesia berlangsung pada periode...',o:['1945-1950','1950-1959','1959-1966','1966-1998'],a:2,e:'Demokrasi Terpimpin: 1959-1966 (era Soekarno). Dimulai dengan Dekrit Presiden 5 Juli 1959 yang membubarkan konstituante.'},
+  {q:'Sila ke-4 Pancasila berbunyi...',o:['Keadilan sosial bagi seluruh rakyat Indonesia','Persatuan Indonesia','Kemanusiaan yang adil dan beradab','Kerakyatan yang dipimpin oleh hikmat kebijaksanaan dalam permusyawaratan/perwakilan'],a:3,e:'Sila 4 berbicara tentang demokrasi dan musyawarah mufakat sebagai cara pengambilan keputusan.'},
+  {q:'Faktor yang mendorong integrasi nasional Indonesia adalah...',o:['Perbedaan bahasa daerah','Sumpah Pemuda, bahasa Indonesia, dan Pancasila','Perbedaan agama antar daerah','Konflik antar suku'],a:1,e:'Faktor integrasi: Sumpah Pemuda (1928), bahasa Indonesia sebagai bahasa persatuan, lagu kebangsaan, bendera, dan Pancasila.'},
+  {q:'Pelanggaran HAM berat yang berupa pembunuhan sistematis terhadap suatu kelompok disebut...',o:['Terorisme','Genosida','Sabotase','Korupsi'],a:1,e:'Genosida = pembunuhan massal sistematis terhadap kelompok tertentu (etnis, agama, dll). Termasuk kejahatan paling berat.'},
+  {q:'Pembukaan UUD 1945 terdiri dari...',o:['3 alinea','4 alinea','5 alinea','2 alinea'],a:1,e:'Pembukaan UUD 1945 memiliki 4 alinea yang memuat tujuan negara (alinea 4), dasar negara Pancasila, dan pernyataan kemerdekaan.'},
+  {q:'Kewajiban warga negara Indonesia antara lain adalah...',o:['Mendapat pendidikan gratis','Mendapatkan pelayanan kesehatan','Membayar pajak dan membela negara','Bebas berpendapat tanpa batas'],a:2,e:'Kewajiban warga negara: membayar pajak (Pasal 23A), membela negara (Pasal 27 Ayat 3), menjunjung tinggi hukum.'},
+  {q:'Prinsip "Bhinneka Tunggal Ika" berarti...',o:['Satu nusa, satu bangsa, satu bahasa','Berbeda-beda tetapi tetap satu jua','Persatuan dalam keragaman budaya','Indonesia negara kesatuan'],a:1,e:'"Bhinneka Tunggal Ika" dari kitab Sutasoma karya Mpu Tantular: berbeda-beda tetapi tetap satu. Semboyan NKRI.'},
+  {q:'Trias Politica membagi kekuasaan negara menjadi...',o:['Eksekutif, Legislatif, Yudikatif','Presiden, MPR, DPR','Pusat, Provinsi, Kabupaten','Federal, Konfederasi, Kesatuan'],a:0,e:'Montesquieu (Trias Politica): Eksekutif (pemerintah), Legislatif (pembuat UU), Yudikatif (kehakiman).'},
+  {q:'UU HAM yang mengatur tentang Hak Asasi Manusia di Indonesia adalah...',o:['UU No. 26/1999','UU No. 39/1999','UU No. 40/1999','UU No. 32/2004'],a:1,e:'UU No. 39 Tahun 1999 tentang Hak Asasi Manusia. UU No. 26/2000 tentang Pengadilan HAM.'},
+  {q:'Reformasi di Indonesia dimulai pada tahun...',o:['1996','1997','1998','1999'],a:2,e:'Reformasi dimulai 1998 setelah lengsernya Soeharto (21 Mei 1998) yang dipicu krisis ekonomi dan demonstrasi mahasiswa.'},
+  {q:'Ancaman terhadap integrasi nasional yang datang dari dalam negeri disebut...',o:['Ancaman militer asing','Separatisme dan konflik SARA','Invasi negara lain','Sanksi ekonomi internasional'],a:1,e:'Ancaman dari dalam: separatisme, konflik SARA, radikalisme, korupsi. Ancaman dari luar: agresi militer, spionase, perang proxy.'},
+],
+pancasila:[
+  {q:'Pancasila dirumuskan dalam sidang...',o:['PPKI','BPUPKI','Konstituante','MPR'],a:1,e:'Pancasila dirumuskan dalam sidang BPUPKI (Badan Penyelidik Usaha Persiapan Kemerdekaan Indonesia), 28 Mei – 1 Juni 1945.'},
+  {q:'Pidato Soekarno yang mencetuskan nama "Pancasila" disampaikan pada tanggal...',o:['28 Mei 1945','1 Juni 1945','22 Juni 1945','18 Agustus 1945'],a:1,e:'1 Juni 1945 Soekarno berpidato mengusulkan 5 dasar negara dan menyebutnya "Pancasila". Tanggal ini diperingati sebagai Hari Lahir Pancasila.'},
+  {q:'Piagam Jakarta ditandatangani pada...',o:['1 Juni 1945','22 Juni 1945','17 Agustus 1945','18 Agustus 1945'],a:1,e:'Piagam Jakarta (22 Juni 1945) adalah naskah awal Pembukaan UUD yang berisi sila 1 dengan tambahan "kewajiban menjalankan syariat Islam."'},
+  {q:'Perubahan pada sila pertama Pancasila dilakukan oleh...',o:['BPUPKI','MPR','PPKI pada 18 Agustus 1945','Soekarno secara pribadi'],a:2,e:'PPKI pada 18 Agustus 1945 mengubah sila 1 dari "... kewajiban menjalankan syariat Islam bagi pemeluk-pemeluknya" menjadi "Ketuhanan Yang Maha Esa."'},
+  {q:'Kedudukan Pancasila sebagai dasar negara berarti...',o:['Pancasila hanya sebagai ideologi partai','Pancasila menjadi norma hukum tertinggi','Pancasila dapat diubah sesuai kebutuhan','Pancasila hanya berlaku untuk umat Islam'],a:1,e:'Pancasila sebagai dasar negara = norma dasar (grundnorm) yang menjadi sumber dari segala sumber hukum di Indonesia.'},
+  {q:'Implementasi sila ke-3 Pancasila dalam kehidupan sehari-hari adalah...',o:['Beribadah sesuai agama','Musyawarah dalam mengambil keputusan','Cinta produk lokal dan gotong royong','Membantu sesama tanpa diskriminasi'],a:2,e:'Sila 3 (Persatuan Indonesia): cinta tanah air, cinta produk dalam negeri, gotong royong, kegiatan yang memperkuat persatuan.'},
+  {q:'Tokoh yang mengusulkan rumusan dasar negara "Peri Kemanusiaan" adalah...',o:['Soekarno','Soepomo','Moh. Yamin','Moh. Hatta'],a:2,e:'Moh. Yamin (29 Mei 1945) mengusulkan: Peri Kebangsaan, Peri Kemanusiaan, Peri Ketuhanan, Peri Kerakyatan, Kesejahteraan Rakyat.'},
+  {q:'Pancasila disebut sebagai "way of life" bangsa Indonesia karena...',o:['Pancasila adalah UUD negara','Pancasila menjadi pandangan dan pedoman hidup bangsa','Pancasila adalah ideologi komunis','Pancasila hanya untuk pejabat negara'],a:1,e:'Pancasila sebagai pandangan hidup (way of life) = nilai-nilai Pancasila menjadi pedoman berpikir, bersikap, dan bertindak warga negara.'},
+  {q:'Ancaman terhadap Pancasila di era modern yang berkaitan dengan teknologi adalah...',o:['Perang saudara','Invasi militer','Hoaks dan ujaran kebencian di media sosial','Bencana alam'],a:2,e:'Era digital: hoaks, ujaran kebencian, dan radikalisme online menjadi ancaman serius bagi persatuan dan ideologi Pancasila.'},
+  {q:'Profil Pelajar Pancasila memiliki berapa dimensi?',o:['4','5','6','7'],a:2,e:'Profil Pelajar Pancasila: 6 dimensi — Beriman & Bertakwa, Berkebinekaan Global, Bergotong Royong, Mandiri, Bernalar Kritis, Kreatif.'},
+  {q:'Tokoh yang berargumen bahwa dasar negara Indonesia harus berdasarkan persatuan adalah...',o:['Moh. Yamin','Soekarno','Soepomo','Moh. Hatta'],a:2,e:'Soepomo (31 Mei 1945) mengusulkan negara integralistik berdasarkan persatuan organis antara negara dan rakyat.'},
+  {q:'Nilai Pancasila yang menekankan kesetaraan di depan hukum tercermin dalam sila ke...',o:['Sila 1','Sila 2','Sila 4','Sila 5'],a:1,e:'Sila 2 (Kemanusiaan yang adil dan beradab): menghormati HAM, tidak diskriminatif, persamaan di depan hukum.'},
+],
+bind:[
+  {q:'Struktur teks laporan hasil observasi (LHO) yang benar adalah...',o:['Tesis→Argumentasi→Penegasan','Orientasi→Krisis→Resolusi','Pernyataan umum→Deskripsi bagian→Deskripsi manfaat','Abstraksi→Orientasi→Krisis→Reaksi→Koda'],a:2,e:'Struktur LHO: Pernyataan umum (definisi/gambaran umum) → Deskripsi bagian → Deskripsi manfaat/simpulan.'},
+  {q:'Tesis dalam teks eksposisi adalah...',o:['Kesimpulan akhir','Pendapat/gagasan utama penulis','Fakta dan data pendukung','Penegasan kembali argumen'],a:1,e:'Tesis = pendapat utama/pernyataan posisi penulis di awal teks eksposisi. Diikuti argumentasi, lalu penegasan ulang.'},
+  {q:'Struktur teks anekdot yang benar adalah...',o:['Tesis→Argumentasi→Kesimpulan','Abstraksi→Orientasi→Krisis→Reaksi→Koda','Identifikasi→Deskripsi','Pembukaan→Inti→Penutup'],a:1,e:'Struktur anekdot: Abstraksi (gambaran awal) → Orientasi (latar) → Krisis (masalah lucu) → Reaksi (respons) → Koda (penutup/moral).'},
+  {q:'Kata yang tidak baku dalam bahasa Indonesia adalah...',o:['Aktif','Sistem','Analisa','Efektif'],a:2,e:'Kata tidak baku: analisa (baku: analisis), aktip (baku: aktif), sistim (baku: sistem). "Analisa" adalah bentuk tidak baku dari "analisis."'},
+  {q:'Teks negosiasi bertujuan untuk...',o:['Menghibur pembaca','Mencapai kesepakatan yang menguntungkan kedua pihak','Mendeskripsikan suatu objek','Mengkritik kebijakan pemerintah'],a:1,e:'Teks negosiasi: proses tawar-menawar untuk mencapai kesepakatan (win-win solution) ketika ada perbedaan kepentingan.'},
+  {q:'Ciri khas teks anekdot yang membedakannya dari teks lain adalah...',o:['Bersifat ilmiah dan faktual','Mengandung humor dan kritik sosial secara tersirat','Berisi instruksi cara melakukan sesuatu','Mendeskripsikan tempat secara detail'],a:1,e:'Anekdot: cerita singkat, lucu, berisi kritik sosial tersirat/implisit. Tokohnya bisa nyata atau fiktif tapi ada sindiran.'},
+  {q:'Konjungsi kausal yang digunakan dalam teks eksposisi adalah...',o:['Meskipun, walaupun','Karena, sehingga, oleh karena itu','Kemudian, lalu, setelah itu','Namun, tetapi, akan tetapi'],a:1,e:'Konjungsi kausal menunjukkan hubungan sebab-akibat: karena, sehingga, akibatnya, oleh karena itu, maka.'},
+  {q:'LHO berbeda dari teks narasi karena LHO...',o:['Menggunakan bahasa kiasan','Bersifat objektif dan tidak ada unsur cerita fiksi','Menceritakan pengalaman pribadi','Menggunakan alur cerita'],a:1,e:'LHO bersifat objektif, ilmiah, faktual, berdasarkan pengamatan nyata. Tidak ada opini pribadi atau unsur cerita fiksi.'},
+  {q:'Paragraf yang efektif memiliki ciri...',o:['Banyak kalimat dan banyak topik','Satu ide pokok yang dikembangkan dengan kalimat pendukung','Penggunaan kata-kata asing yang banyak','Tanpa kalimat penjelas'],a:1,e:'Paragraf efektif: satu ide pokok (kalimat utama) + kalimat-kalimat penjelas yang relevan. Hemat kata, tidak ambigu, logis.'},
+  {q:'Verba relasional dalam LHO digunakan untuk...',o:['Menyatakan tindakan','Mendefinisikan atau mengklasifikasikan sesuatu','Menyatakan perasaan','Memberikan instruksi'],a:1,e:'Verba relasional (adalah, merupakan, ialah, terdiri dari) digunakan dalam LHO untuk mendefinisikan dan mengklasifikasikan objek yang diamati.'},
+  {q:'Kalimat "Pertama, masak air hingga mendidih" adalah ciri khas teks...',o:['Anekdot','Eksposisi','Prosedur','Narasi'],a:2,e:'Teks prosedur/procedure menggunakan: kalimat imperatif (perintah), konjungsi temporal (pertama, lalu, kemudian, akhirnya).'},
+  {q:'Struktur teks negosiasi yang benar adalah...',o:['Orientasi→Pengajuan→Penawaran→Persetujuan','Tesis→Argumentasi→Reaksi','Abstraksi→Orientasi→Krisis→Koda','Identifikasi→Deskripsi→Simpulan'],a:0,e:'Struktur negosiasi: Orientasi (pembuka) → Pengajuan (tawaran awal) → Penawaran (tawar-menawar) → Persetujuan (kesepakatan).'},
+],
+bing:[
+  {q:'Simple Present Tense digunakan untuk...',o:['Kejadian yang sedang terjadi sekarang','Kebiasaan atau fakta umum','Kejadian yang akan terjadi','Kejadian yang sudah selesai'],a:1,e:'Simple Present: kebiasaan (every day, always, usually) dan fakta umum. S + V1(+s/es). Ex: She reads every day.'},
+  {q:'Kalimat yang menggunakan Present Continuous Tense adalah...',o:['She reads every day','I am studying now','He went to school yesterday','They will come tomorrow'],a:1,e:'Present Continuous: S + is/am/are + V-ing. Untuk kejadian yang sedang berlangsung saat bicara. Signal word: now, at the moment.'},
+  {q:'Struktur Descriptive Text terdiri dari...',o:['Goal → Materials → Steps','Identification → Description','Orientation → Complication → Resolution','Tesis → Argumentasi → Penegasan'],a:1,e:'Descriptive text: Identification (siapa/apa yang dideskripsikan) + Description (ciri-ciri, karakteristik objek).'},
+  {q:'Tujuan Procedure Text adalah...',o:['Menghibur pembaca dengan cerita','Mendeskripsikan objek tertentu','Menginstruksikan cara melakukan sesuatu','Meyakinkan pembaca dengan argumen'],a:2,e:'Procedure text: to instruct (menginstruksikan). Strukturnya: Goal → Materials/Tools → Steps. Menggunakan kalimat imperatif.'},
+  {q:'Kata yang digunakan sebagai "signal word" Simple Past Tense adalah...',o:['Now, currently, at the moment','Yesterday, last week, ago','Tomorrow, next week, soon','Every day, usually, often'],a:1,e:'Simple Past signal words: yesterday, last (week/month/year), ago, in (2020), when (dalam kalimat lampau).'},
+  {q:'Narrative text biasanya menggunakan tense...',o:['Simple Present','Present Continuous','Simple Past','Future Tense'],a:2,e:'Narrative text menggunakan Simple Past tense karena menceritakan kejadian yang sudah terjadi di masa lampau.'},
+  {q:'Dalam Procedure Text, kata "First, Then, Next, Finally" termasuk...',o:['Adjectives','Temporal conjunctions','Modal verbs','Adverbs of frequency'],a:1,e:'First, Then, Next, Finally adalah temporal conjunctions (konjungsi waktu/urutan) yang menghubungkan langkah-langkah dalam procedure text.'},
+  {q:'"I think this idea is interesting" merupakan ekspresi...',o:['Asking for opinion','Expressing agreement','Expressing opinion','Expressing disagreement'],a:2,e:'Expressing opinion: I think, I believe, In my opinion, As far as I know. Asking opinion: What do you think? How do you feel?'},
+  {q:'Moral value dalam Narrative Text disebut juga...',o:['Complication','Reorientation','Resolution','Orientation'],a:1,e:'Reorientation = penutup narrative yang mengandung moral value (pesan moral). Bersifat opsional, tidak semua narrative punya.'},
+  {q:'Kalimat "Boil 400ml of water" adalah contoh kalimat...',o:['Declarative','Interrogative','Imperative','Exclamative'],a:2,e:'Kalimat imperatif = kalimat perintah. Dimulai dengan verb (kata kerja). Sering digunakan dalam procedure/instruction text.'},
+  {q:'Dalam Descriptive Text, kalimat "Borobudur is a 9th-century temple" menggunakan...',o:['Past tense','Simple Present tense','Future tense','Present Perfect'],a:1,e:'Descriptive text menggunakan Simple Present untuk mendeskripsikan ciri-ciri objek yang masih ada/berlaku saat ini.'},
+  {q:'Kata "will" dalam kalimat "They will come tomorrow" menunjukkan...',o:['Kebiasaan','Kejadian lampau','Kejadian yang akan datang (future)','Kejadian yang sedang berlangsung'],a:2,e:'Will = future tense marker. "They will come tomorrow" = mereka akan datang besok. Signal words: tomorrow, next week, soon.'},
+],
+senbud:[
+  {q:'Unsur-unsur seni rupa meliputi...',o:['Melodi, harmoni, ritme','Titik, garis, bidang, warna, tekstur, gelap-terang, ruang','Gerak, irama, ekspresi','Naskah, sutradara, aktor'],a:1,e:'Unsur seni rupa: titik, garis, bidang, warna, tekstur, gelap-terang (cahaya), dan ruang. Berbeda dengan unsur seni musik atau tari.'},
+  {q:'Batik Indonesia diakui UNESCO sebagai Warisan Kemanusiaan pada tahun...',o:['2003','2007','2009','2012'],a:2,e:'UNESCO mengakui batik Indonesia sebagai Warisan Kemanusiaan untuk Budaya Lisan dan Nonbendawi (Intangible Cultural Heritage) pada 2009.'},
+  {q:'Angklung berasal dari provinsi...',o:['Jawa Tengah','Bali','Jawa Barat (Sunda)','Sumatera Barat'],a:2,e:'Angklung adalah alat musik tradisional dari Jawa Barat (Sunda). Diakui UNESCO sebagai Warisan Budaya Tak Benda pada 2010.'},
+  {q:'Tari Saman berasal dari...',o:['Aceh','Sumatera Barat','Kalimantan','Papua'],a:0,e:'Tari Saman berasal dari Aceh, diciptakan oleh ulama bernama Syekh Saman. Diakui UNESCO sebagai Warisan Budaya Tak Benda.'},
+  {q:'Prinsip seni rupa yang menciptakan kesan gerak atau pengulangan pola disebut...',o:['Proporsi','Keseimbangan','Irama','Harmoni'],a:2,e:'Irama dalam seni rupa = pengulangan pola, warna, atau bentuk yang menciptakan kesan gerak dan dinamika pada karya.'},
+  {q:'Gamelan adalah alat musik tradisional dari daerah...',o:['Bali dan Jawa','Aceh dan Batak','Papua dan NTT','Kalimantan dan Sulawesi'],a:0,e:'Gamelan adalah ansambel musik tradisional dari Jawa dan Bali. Terdiri dari berbagai instrumen perkusi, metalofon, dan dawai.'},
+  {q:'Tangga nada diatonis terdiri dari berapa nada?',o:['5 nada','7 nada','8 nada','12 nada'],a:1,e:'Diatonis = 7 nada (do re mi fa sol la si). Pentatonis = 5 nada (banyak digunakan dalam musik tradisional Asia termasuk Indonesia).'},
+  {q:'Gerak maknawi dalam tari adalah...',o:['Gerak murni yang indah tanpa makna khusus','Gerak yang memiliki arti atau makna tertentu (memanah, menyembah)','Gerak akrobatik yang sulit','Gerak yang tidak beraturan'],a:1,e:'Gerak maknawi = gerak yang punya makna/arti, seperti gerak memanah, menyembah, menangis. Lawan dari gerak murni (hanya indah).'},
+  {q:'Wayang kulit termasuk jenis seni...',o:['Seni musik','Seni rupa 3D','Seni teater tradisional','Seni tari kontemporer'],a:2,e:'Wayang kulit adalah seni teater tradisional yang menggabungkan seni pedalangan (dalang), seni rupa (wayang), dan seni musik (gamelan).'},
+  {q:'Tari Kecak berasal dari...',o:['Jawa Tengah','Bali','Sulawesi','NTB'],a:1,e:'Tari Kecak adalah tari ritual dari Bali yang terkenal dengan pengiring berupa vokal "cak cak cak" tanpa instrumen musik. Mengisahkan Ramayana.'},
+  {q:'Batik dengan motif Parang identik dengan batik dari daerah...',o:['Pekalongan','Cirebon','Yogyakarta/Solo','Madura'],a:2,e:'Motif Parang adalah motif batik yang identik dengan keraton Yogyakarta dan Solo (Surakarta). Dahulu hanya boleh dipakai keluarga kerajaan.'},
+  {q:'Unsur musik yang mengatur keras lembutnya bunyi adalah...',o:['Melodi','Ritme','Tempo','Dinamik'],a:3,e:'Dinamik = keras lembutnya bunyi (volume). Tempo = cepat lambatnya lagu. Melodi = rangkaian nada. Ritme = pola ketukan.'},
+]
+};
+
+var quizState={questions:[],current:0,score:0,wrong:0,answered:false};
+
+function shuffleArr(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+window.startQuiz=function(){
+  var mapel=document.getElementById('quizMapelSelect').value;
+  var jumlah=parseInt(document.getElementById('quizJumlahSelect').value,10)||10;
+  var pool=QUIZ_DATA[mapel]||[];
+  if(!pool.length){toast('Data soal tidak ditemukan');return;}
+  var shuffled=shuffleArr(pool);
+  var selected=shuffled.slice(0,Math.min(jumlah,shuffled.length));
+  quizState={questions:selected,current:0,score:0,wrong:0,answered:false,mapel:mapel};
+  document.getElementById('quizBox').classList.add('active');
+  document.getElementById('quizResult').style.display='none';
+  document.getElementById('quizResult').classList.remove('active');
+  document.getElementById('quizBox').querySelector('.quiz-prog-bar').style.display='block';
+  document.getElementById('quizBox').querySelector('.quiz-header-info').style.display='flex';
+  document.getElementById('quizBox').querySelector('.quiz-question-wrap').style.display='block';
+  document.getElementById('quizNextBtn').style.display='none';
+  document.getElementById('quizFeedback').style.display='none';
+  document.getElementById('quizBox').scrollIntoView({behavior:'smooth',block:'start'});
+  renderQuizQ();
+};
+
+function renderQuizQ(){
+  var q=quizState.questions[quizState.current];
+  if(!q)return;
+  var total=quizState.questions.length;
+  var mapelName=(QUIZ_DATA[quizState.mapel]&&Object.keys(MAPEL_DATA).indexOf(quizState.mapel)>=0)?MAPEL_DATA[quizState.mapel].name:quizState.mapel.toUpperCase();
+
+  document.getElementById('quizProgFill').style.width=((quizState.current/total)*100)+'%';
+  document.getElementById('quizNumBadge').textContent='Soal '+(quizState.current+1)+' / '+total;
+  document.getElementById('quizScoreLive').textContent='✅ '+quizState.score+' | ❌ '+quizState.wrong;
+  document.getElementById('quizQMapel').textContent=mapelName+' · Kelas X';
+  document.getElementById('quizQText').textContent=q.q;
+  document.getElementById('quizFeedback').style.display='none';
+  document.getElementById('quizNextBtn').style.display='none';
+  quizState.answered=false;
+
+  var letters=['A','B','C','D'];
+  var opts=document.getElementById('quizOptions');
+  opts.innerHTML=q.o.map(function(opt,i){
+    return '<button class="quiz-opt" onclick="answerQuiz('+i+')"><span class="quiz-opt-letter">'+letters[i]+'</span>'+opt+'</button>';
+  }).join('');
+}
+
+window.answerQuiz=function(idx){
+  if(quizState.answered)return;
+  quizState.answered=true;
+  var q=quizState.questions[quizState.current];
+  var opts=document.querySelectorAll('.quiz-opt');
+  var correct=q.a===idx;
+  if(correct){quizState.score++;}else{quizState.wrong++;}
+  opts.forEach(function(o,i){
+    o.classList.add('disabled');
+    if(i===q.a)o.classList.add('correct');
+    else if(i===idx&&!correct)o.classList.add('wrong');
+  });
+  var fb=document.getElementById('quizFeedback');
+  fb.className='quiz-feedback '+(correct?'correct':'wrong');
+  fb.textContent=(correct?'✅ Benar! ':'❌ Salah. ')+q.e;
+  fb.style.display='block';
+  document.getElementById('quizScoreLive').textContent='✅ '+quizState.score+' | ❌ '+quizState.wrong;
+  var nBtn=document.getElementById('quizNextBtn');
+  nBtn.style.display='block';
+  nBtn.textContent=quizState.current+1>=quizState.questions.length?'Lihat Hasil 🏆':'Soal Berikutnya →';
+};
+
+window.quizNext=function(){
+  quizState.current++;
+  if(quizState.current>=quizState.questions.length){showQuizResult();return;}
+  document.getElementById('quizFeedback').style.display='none';
+  document.getElementById('quizNextBtn').style.display='none';
+  renderQuizQ();
+};
+
+function showQuizResult(){
+  var total=quizState.questions.length;
+  var pct=Math.round((quizState.score/total)*100);
+  var emoji=pct>=90?'🏆':pct>=75?'⭐':pct>=60?'👍':pct>=40?'📚':'💪';
+  var title=pct>=90?'Luar Biasa!':pct>=75?'Keren Banget!':pct>=60?'Bagus!':pct>=40?'Lumayan!':'Terus Belajar!';
+  document.getElementById('quizResult').style.display='block';
+  document.getElementById('quizResult').classList.add('active');
+  document.getElementById('quizBox').querySelector('.quiz-prog-bar').style.display='none';
+  document.getElementById('quizBox').querySelector('.quiz-header-info').style.display='none';
+  document.getElementById('quizBox').querySelector('.quiz-question-wrap').style.display='none';
+  document.getElementById('quizNextBtn').style.display='none';
+  document.getElementById('quizFeedback').style.display='none';
+  document.getElementById('quizProgFill').style.width='100%';
+  document.getElementById('quizResultEmoji').textContent=emoji;
+  document.getElementById('quizResultTitle').textContent=title;
+  document.getElementById('quizResultScore').textContent=quizState.score+'/'+total;
+  document.getElementById('quizResultSub').textContent='Nilai kamu: '+pct+'%';
+  document.getElementById('quizResultDetail').innerHTML=
+    '<div class="quiz-rd-item"><div class="quiz-rd-val" style="color:#22c55e">'+quizState.score+'</div><div class="quiz-rd-lbl">Benar</div></div>'+
+    '<div class="quiz-rd-item"><div class="quiz-rd-val" style="color:#ef4444">'+quizState.wrong+'</div><div class="quiz-rd-lbl">Salah</div></div>'+
+    '<div class="quiz-rd-item"><div class="quiz-rd-val" style="color:#0284c7">'+pct+'%</div><div class="quiz-rd-lbl">Skor</div></div>';
+}
+
+})();
+</script>
+</body>
+</html>
